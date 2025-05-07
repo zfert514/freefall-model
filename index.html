@@ -2,81 +2,62 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <title>Title</title>
+        <title>Freefall Simulation</title>
         <link rel="stylesheet" href="styles.css" />
-        <script src="script.js"></script>
+        <script src="script.js" defer></script>
     </head>
     <body>
-        <h1 class="title">Programming Assessment</h1>
-        <div id="mainDiv">
-            <p>
-                Assessment: Build out an interactive simulation that demonstrates what happens to objects in freefall on
-                planet earth.
-            </p>
-        </div>
-        <ul>
-            <li>Use earth's gravity.</li>
-            <li>For the atmosphere, provide the following options: air, no air (vacuum).</li>
-            <li>Provide UI elements to start and restart the simulation.</li>
-            <li>Provide UI elements to display elapsed time and velocity.</li>
-            <li>
-                Graphics/animation can be basic/utilitarian -- what's most important is the math model/simulation code.
-            </li>
-            <li>
-                Bonus: provide UI element that displays some/all of the following: forces of gravity, buoyancy, and
-                drag.
-            </li>
-        </ul>
-        <br />
-        <div>
-            <p>Free Fall Velocity Formula</p>
-            <p>v=v<sub>0</sub>+gt where:</p>
-            <ul>
-                <li>v<sub>0</sub> – Initial velocity (measured in m/s or ft/s)</li>
-                <li>t – Fall time (measured in seconds)</li>
-                <li>g – Free fall acceleration (expressed in m/s² or ft/s²)</li>
-            </ul>
-        </div>
-        <div>
-            <p>Free Fall Time Formula</p>
-            <math display="block">
-                <mrow>
-                    <mi>t</mi>
-                    <mo>=</mo>
-                    <msqrt>
-                        <mfrac>
-                            <mrow>
-                                <mn>2</mn>
-                                <mi>h</mi>
-                            </mrow>
-                            <mrow>
-                                <mi>g</mi>
-                            </mrow>
-                        </mfrac>
-                    </msqrt>
-                </mrow>
-            </math>
-            <ul>
-                <li>h– Initial height (measured in m)</li>
-                <li>t – Fall time (measured in seconds)</li>
-                <li>g – Free fall acceleration (expressed in m/s²)</li>
-            </ul>
-        </div>
+        <h1 class="title">Freefall Simulation</h1>
+        <p>Set the parameters below and start the simulation.</p>
+
         <form>
-            <label for="height">Height:</label>
+            <label for="height">Height (m):</label>
             <input type="number" id="height" name="height" value="10" min="0" />
             <br />
-            <label for="gravity">Gravity:</label>
-            <input type="number" id="gravity" name="gravity" value="9.8" min="0" />
+
+            <label for="gravityType">Gravity:</label>
+            <select id="gravityType" onchange="setGravity()">
+                <option value="9.8">Earth (9.8 m/s²)</option>
+                <option value="1.62">Moon (1.62 m/s²)</option>
+                <option value="3.71">Mars (3.71 m/s²)</option>
+                <option value="0">Vacuum (0 m/s²)</option>
+                <option value="custom">Custom</option>
+            </select>
+            <input type="number" id="gravity" name="gravity" value="9.8" step="0.01" min="0" />
             <br />
-            <label> <input type="radio" name="GFG" id="GFG" value="GeeksforGeeks" checked />Gravity </label>
-            <label><input type="radio" name="GFG" id="HTML" value="HTML" />Vacuum</label>
-            <label><input type="radio" name="GFG" id="JS" value="JavaScript" />Custom</label>
+            <label><input type="checkbox" id="soundToggle" /> Play Sound on Impact</label>
+
             <br />
-            <label for="time">Time:</label>
-            <input type="number" id="time" name="time" value="1.4" min="0" />
+
+            <label for="atmosphere">Atmosphere:</label>
+            <select id="atmosphere">
+                <option value="air">Air</option>
+                <option value="vacuum">Vacuum</option>
+            </select>
             <br />
-            <button onclick="buttonClicked()">Click me</button>
         </form>
+
+        <button onclick="startSimulation()">Start Simulation</button>
+        <button onclick="restartSimulation()">Restart Simulation</button>
+
+        <div id="animationArea" style="position: relative; height: 300px; border: 1px solid #ccc; margin-top: 20px">
+            <div
+                id="ball"
+                style="
+                    width: 20px;
+                    height: 20px;
+                    border-radius: 50%;
+                    background: red;
+                    position: absolute;
+                    top: 0;
+                    left: 50%;
+                    transform: translateX(-50%);
+                "></div>
+        </div>
+        <div id="output">
+            <p id="elapsedTime">Elapsed Time:</p>
+            <p id="velocity">Velocity:</p>
+            <p id="force">Forces:</p>
+        </div>
     </body>
 </html>
