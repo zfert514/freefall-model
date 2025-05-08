@@ -1,213 +1,160 @@
-/*
-Freefall Simulation Script
---------------------------
-This script controls the simulation of an object in freefall. It includes:
-- Gravity presets (Earth, Moon, Mars, Vacuum, Custom)
-- Atmosphere options (air or vacuum)
-- Real-time animation of falling object
-- Calculation and display of velocity, time, and forces
-- Optional sound effect on impact
+/* 
+Freefall Simulation with Canvas UI and Drag-to-Set Height
+---------------------------------------------------------
+This script creates a two-canvas interactive simulation:
+- simulationCanvas: handles falling ball physics and animation.
+- overlayCanvas: displays velocity, elapsed time, and forces.
+- Users can drag the ball vertically before starting to simulate to set height.
 */
 
-let intervalId = null;       // For managing the animation loop
-let startTime = null;        // To track when simulation starts
+// Main interval ID for the simulation animation loop
+let intervalId = null;
+let startTime = null;
+let isPaused = false;
+// Flag to track whether the user is currently dragging the red ball
+let isDragging = false;
+let ballY = 150;  // Initial Y center in canvas
+let height = 15;  // Default 15 meters (~50 ft)
+const maxMeters = 30.48; // 100 ft in meters
 
-// Set gravity based on the dropdown selection
+let velocity = 0;
+let position = 0;
+let elapsed = 0;
+
+// Set gravity value from dropdown or allow custom
 function setGravity() {
     const gravitySelect = document.getElementById("gravityType");
     const gravityInput = document.getElementById("gravity");
 
     if (gravitySelect.value === "custom") {
-        gravityInput.removeAttribute("disabled"); // Allow editing
+        gravityInput.removeAttribute("disabled");
     } else {
-        gravityInput.value = gravitySelect.value; // Set gravity
+        gravityInput.value = gravitySelect.value;
         gravityInput.setAttribute("disabled", "true");
     }
 }
 
-// Play a metal impact sound when the object hits the ground
+// Play sound if toggle is enabled
 function playImpactSound() {
     if (!document.getElementById("soundToggle").checked) return;
     const audio = new Audio("https://www.soundjay.com/mechanical/sounds/metal-impact-1.mp3");
     audio.play();
 }
 
-// Start the simulation and animate the falling object
-function startSimulation() {
-    clearInterval(intervalId); // Stop previous simulation if running
-
-    // Get user inputs
-    const height = parseFloat(document.getElementById("height").value);
-    const gravity = parseFloat(document.getElementById("gravity").value);
-    const atmosphere = document.getElementById("atmosphere").value;
-
-    // UI elements to update
-    const velocityOutput = document.getElementById("velocity");
-    const timeOutput = document.getElementById("elapsedTime");
-    const forceOutput = document.getElementById("force");
-
-    // Simulation variables
-    let dragCoefficient = (atmosphere === "air") ? 0.1 : 0; // Simple drag simulation
-    let velocity = 0;
-    let position = height;
-    let elapsed = 0;
-
-    startTime = Date.now();
-
-    // Setup for animation
-    const ball = document.getElementById("ball");
-    const containerHeight = document.getElementById("animationArea").clientHeight;
-    const pixelsPerMeter = containerHeight / height;
-
-    ball.style.top = "0px";
-
-    intervalId = setInterval(() => {
-        // Update time and physics
-        elapsed = (Date.now() - startTime) / 1000;
-        let dragForce = dragCoefficient * velocity * velocity;
-        let netAcceleration = gravity - dragForce;
-
-        velocity += netAcceleration * 0.05;       // Update velocity
-        position -= velocity * 0.05;              // Update position
-
-        // Update UI values
-        if (position <= 0) {
-            clearInterval(intervalId);
-            playImpactSound();
-            velocityOutput.textContent = "Velocity: 0 m/s (landed)";
-            timeOutput.textContent = `Elapsed Time: ${elapsed.toFixed(2)} s`;
-            forceOutput.textContent = `Force of Gravity: ${gravity.toFixed(2)} m/s², Drag: ${dragForce.toFixed(2)} m/s²`;
-            ball.style.top = containerHeight - 20 + "px"; // Position at bottom
-        } else {
-            velocityOutput.textContent = `Velocity: ${velocity.toFixed(2)} m/s`;
-            timeOutput.textContent = `Elapsed Time: ${elapsed.toFixed(2)} s`;
-            forceOutput.textContent = `Force of Gravity: ${gravity.toFixed(2)} m/s², Drag: ${dragForce.toFixed(2)} m/s²`;
-
-            const currentTop = (height - position) * pixelsPerMeter;
-            ball.style.top = Math.min(currentTop, containerHeight - 20) + "px";
-        }
-    }, 50);
-}
-
-// Reset simulation and reset ball position with animation
+// Restart everything, reset ball to center
 function restartSimulation() {
     clearInterval(intervalId);
+    const simCanvas = document.getElementById("simulationCanvas");
+    const overlay = document.getElementById("overlayCanvas");
+    const simCtx = simCanvas.getContext("2d");
+    const overlayCtx = overlay.getContext("2d");
+    simCtx.clearRect(0, 0, simCanvas.width, simCanvas.height);
+    overlayCtx.clearRect(0, 0, overlay.width, overlay.height);
+
+    ballY = simCanvas.height / 2;
+    updateHeightFromY();
+
     document.getElementById("velocity").textContent = "Velocity: ";
     document.getElementById("elapsedTime").textContent = "Elapsed Time: ";
     document.getElementById("force").textContent = "Forces: ";
+    document.getElementById("pauseBtn").disabled = true;
+    document.getElementById("pauseBtn").textContent = "Pause Simulation";
 
-    const ball = document.getElementById("ball");
-    ball.style.transition = "top 0.5s ease-out";
-    ball.style.top = "0px";
-    setTimeout(() => {
-        ball.style.transition = "";
-    }, 500);
+    drawBall(ballY);
 }
 
-
-// Canvas-based animation for falling object
-function startSimulation() {
-    clearInterval(intervalId);
-
-    const height = parseFloat(document.getElementById("height").value);
-    const gravity = parseFloat(document.getElementById("gravity").value);
-    const atmosphere = document.getElementById("atmosphere").value;
-    const velocityOutput = document.getElementById("velocity");
-    const timeOutput = document.getElementById("elapsedTime");
-    const forceOutput = document.getElementById("force");
-
-    let dragCoefficient = (atmosphere === "air") ? 0.1 : 0;
-    let velocity = 0;
-    let position = height;
-    let elapsed = 0;
-
+// Converts Y-coordinate to height and updates the input field
+// Converts the Y position of the red ball in the canvas into a height (in meters).
+function updateHeightFromY() {
     const canvas = document.getElementById("simulationCanvas");
-    const ctx = canvas.getContext("2d");
-    const pixelsPerMeter = canvas.height / height;
-
-    startTime = Date.now();
-
-    intervalId = setInterval(() => {
-        elapsed = (Date.now() - startTime) / 1000;
-        let dragForce = dragCoefficient * velocity * velocity;
-        let netAcceleration = gravity - dragForce;
-
-        velocity += netAcceleration * 0.05;
-        position -= velocity * 0.05;
-
-        // Update canvas
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        let y = (height - position) * pixelsPerMeter;
-        y = Math.min(y, canvas.height - 10);
-
-        ctx.beginPath();
-        ctx.arc(canvas.width / 2, y, 10, 0, Math.PI * 2);
-        ctx.fillStyle = "red";
-        ctx.fill();
-
-        // Update UI
-        if (position <= 0) {
-            clearInterval(intervalId);
-            playImpactSound();
-            velocityOutput.textContent = "Velocity: 0 m/s (landed)";
-            timeOutput.textContent = `Elapsed Time: ${elapsed.toFixed(2)} s`;
-            forceOutput.textContent = `Force of Gravity: ${gravity.toFixed(2)} m/s², Drag: ${dragForce.toFixed(2)} m/s²`;
-        } else {
-            velocityOutput.textContent = `Velocity: ${velocity.toFixed(2)} m/s`;
-            timeOutput.textContent = `Elapsed Time: ${elapsed.toFixed(2)} s`;
-            forceOutput.textContent = `Force of Gravity: ${gravity.toFixed(2)} m/s², Drag: ${dragForce.toFixed(2)} m/s²`;
-        }
-    }, 50);
+    const metersPerPixel = maxMeters / canvas.height;
+    height = (canvas.height - ballY) * metersPerPixel;
+    height = Math.max(0, Math.min(height, maxMeters));
+    document.getElementById("height").value = height.toFixed(2);
 }
 
-function restartSimulation() {
-    clearInterval(intervalId);
+// Draw the red ball at current Y
+// Draws the red ball at a given Y position in the simulation canvas.
+function drawBall(y) {
     const canvas = document.getElementById("simulationCanvas");
     const ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    document.getElementById("velocity").textContent = "Velocity: ";
-    document.getElementById("elapsedTime").textContent = "Elapsed Time: ";
-    document.getElementById("force").textContent = "Forces: ";
+    ctx.beginPath();
+    ctx.arc(canvas.width / 2, y, 10, 0, Math.PI * 2);
+    ctx.fillStyle = "red";
+    ctx.fill();
 }
 
+// Draw data overlay
+// Draws simulation data such as elapsed time, velocity, gravity, and drag on the overlay canvas.
+function drawOverlay(elapsed, velocity, gravity, drag) {
+    const overlay = document.getElementById("overlayCanvas");
+    const ctx = overlay.getContext("2d");
+    ctx.clearRect(0, 0, overlay.width, overlay.height);
+    ctx.font = "12px sans-serif";
+    ctx.fillStyle = "black";
+    ctx.fillText(`Elapsed: ${elapsed.toFixed(2)}s`, 10, 20);
+    ctx.fillText(`Velocity: ${velocity.toFixed(2)} m/s`, 10, 40);
+    ctx.fillText(`Gravity: ${gravity.toFixed(2)} m/s²`, 10, 60);
+    ctx.fillText(`Drag: ${drag.toFixed(2)} m/s²`, 10, 80);
+}
 
-let isPaused = false;  // Track pause state
+// Allow dragging the ball
+// Handles mouse down event to detect if the user starts dragging the red ball.
+window.addEventListener("mousedown", (e) => {
+    const canvas = document.getElementById("simulationCanvas");
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    if (Math.abs(x - canvas.width / 2) < 15 && Math.abs(y - ballY) < 15) {
+        isDragging = true;
+    }
+});
 
+// Handles mouse movement while dragging to reposition the red ball and update height.
+window.addEventListener("mousemove", (e) => {
+    if (!isDragging) return;
+    const canvas = document.getElementById("simulationCanvas");
+    const rect = canvas.getBoundingClientRect();
+    ballY = Math.max(0, Math.min(e.clientY - rect.top, canvas.height));
+    drawBall(ballY);
+    updateHeightFromY();
+});
+
+window.addEventListener("mouseup", () => {
+    isDragging = false;
+});
+
+// Pause/resume toggle
+// Toggles the simulation between paused and resumed states.
 function pauseSimulation() {
     const pauseBtn = document.getElementById("pauseBtn");
     if (!isPaused) {
-        clearInterval(intervalId);  // Stop animation
+        clearInterval(intervalId);
         isPaused = true;
         pauseBtn.textContent = "Resume Simulation";
     } else {
-        // Resume simulation
-        startTime = Date.now() - elapsed * 1000;  // Keep elapsed time accurate
-        startSimulation(true);  // Resume with current values
         isPaused = false;
         pauseBtn.textContent = "Pause Simulation";
+        startSimulation(true);
     }
 }
 
-// Modified startSimulation to optionally resume from paused state
+// Start simulation; if resume=true, use current velocity/position
+// Starts or resumes the simulation depending on the 'resume' flag.
 function startSimulation(resume = false) {
     clearInterval(intervalId);
+    isPaused = false;
 
-    const height = parseFloat(document.getElementById("height").value);
     const gravity = parseFloat(document.getElementById("gravity").value);
     const atmosphere = document.getElementById("atmosphere").value;
-    const velocityOutput = document.getElementById("velocity");
-    const timeOutput = document.getElementById("elapsedTime");
-    const forceOutput = document.getElementById("force");
-
-    let dragCoefficient = (atmosphere === "air") ? 0.1 : 0;
+    const dragCoefficient = (atmosphere === "air") ? 0.1 : 0;
     const canvas = document.getElementById("simulationCanvas");
-    const ctx = canvas.getContext("2d");
-    const pixelsPerMeter = canvas.height / height;
+    const overlay = document.getElementById("overlayCanvas");
+    const pixelsPerMeter = canvas.height / maxMeters;
 
-    const pauseBtn = document.getElementById("pauseBtn");
-    pauseBtn.disabled = false;
-    pauseBtn.textContent = "Pause Simulation";
+    document.getElementById("pauseBtn").disabled = false;
+    document.getElementById("pauseBtn").textContent = "Pause Simulation";
 
     if (!resume) {
         velocity = 0;
@@ -219,33 +166,28 @@ function startSimulation(resume = false) {
 
     intervalId = setInterval(() => {
         elapsed = (Date.now() - startTime) / 1000;
-        let dragForce = dragCoefficient * velocity * velocity;
-        let netAcceleration = gravity - dragForce;
-
-        velocity += netAcceleration * 0.05;
+        const dragForce = dragCoefficient * velocity * velocity;
+        const netAccel = gravity - dragForce;
+        velocity += netAccel * 0.05;
         position -= velocity * 0.05;
 
-        // Draw on canvas
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        let y = (height - position) * pixelsPerMeter;
-        y = Math.min(y, canvas.height - 10);
-        ctx.beginPath();
-        ctx.arc(canvas.width / 2, y, 10, 0, Math.PI * 2);
-        ctx.fillStyle = "red";
-        ctx.fill();
+        // Update animation
+        const y = canvas.height - position * pixelsPerMeter;
+        drawBall(Math.min(canvas.height - 10, y));
+        drawOverlay(elapsed, velocity, gravity, dragForce);
 
-        // Update output
         if (position <= 0) {
             clearInterval(intervalId);
+            drawOverlay(elapsed, 0, gravity, 0);
             playImpactSound();
-            pauseBtn.disabled = true;
-            velocityOutput.textContent = "Velocity: 0 m/s (landed)";
-            timeOutput.textContent = `Elapsed Time: ${elapsed.toFixed(2)} s`;
-            forceOutput.textContent = `Force of Gravity: ${gravity.toFixed(2)} m/s², Drag: ${dragForce.toFixed(2)} m/s²`;
-        } else {
-            velocityOutput.textContent = `Velocity: ${velocity.toFixed(2)} m/s`;
-            timeOutput.textContent = `Elapsed Time: ${elapsed.toFixed(2)} s`;
-            forceOutput.textContent = `Force of Gravity: ${gravity.toFixed(2)} m/s², Drag: ${dragForce.toFixed(2)} m/s²`;
+            document.getElementById("pauseBtn").disabled = true;
         }
     }, 50);
 }
+
+// Initialize ball position
+// On page load: draw the red ball and update the initial height readout.
+window.onload = () => {
+    drawBall(ballY);
+    updateHeightFromY();
+};
