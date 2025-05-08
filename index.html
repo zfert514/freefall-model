@@ -1,13 +1,7 @@
 <!--
-Freefall Simulation HTML
-------------------------
-This HTML file builds the interface for the freefall simulation, including:
-- Input fields for initial height
-- Dropdown for selecting gravity (Earth, Moon, Mars, Vacuum, Custom)
-- Dropdown for selecting atmosphere (Air or Vacuum)
-- Start and Restart buttons
-- Display elements for elapsed time, velocity, and forces
-- A simple animated ball to represent the falling object
+Freefall Simulation HTML with Canvas
+------------------------------------
+Replaces div-based animation with canvas and overlays data display box.
 -->
 <!doctype html>
 <html lang="en">
@@ -21,14 +15,11 @@ This HTML file builds the interface for the freefall simulation, including:
     <h1 class="title">Freefall Simulation</h1>
     <p>Set the parameters below and start the simulation.</p>
 
-    <!-- Simulation Configuration Form -->
     <form>
-        <!-- Input: Initial height in meters -->
         <label for="height">Height (m):</label>
         <input type="number" id="height" name="height" value="10" step="0.1" />
         <br />
 
-        <!-- Dropdown: Select gravitational body or custom -->
         <label for="gravityType">Gravity:</label>
         <select id="gravityType" onchange="setGravity()">
             <option value="9.8">Earth (9.8 m/s²)</option>
@@ -37,11 +28,9 @@ This HTML file builds the interface for the freefall simulation, including:
             <option value="0">Vacuum (0 m/s²)</option>
             <option value="custom">Custom</option>
         </select>
-        <!-- Input: Custom gravity value -->
         <input type="number" id="gravity" name="gravity" value="9.8" step="0.01" />
         <br />
 
-        <!-- Dropdown: Atmosphere options -->
         <label for="atmosphere">Atmosphere:</label>
         <select id="atmosphere">
             <option value="air">Air</option>
@@ -49,24 +38,24 @@ This HTML file builds the interface for the freefall simulation, including:
         </select>
         <br />
 
-        <!-- Checkbox: Enable sound on impact -->
         <label><input type="checkbox" id="soundToggle" /> Play Sound on Impact</label>
     </form>
 
-    <!-- Buttons: Start and Restart the simulation -->
     <button onclick="startSimulation()">Start Simulation</button>
+
+    <button onclick="pauseSimulation()" id="pauseBtn" disabled>Pause Simulation</button>
     <button onclick="restartSimulation()">Restart Simulation</button>
 
-    <!-- Display: Animated falling ball area -->
-    <div id="animationArea" style="position: relative; height: 300px; border: 1px solid #ccc; margin-top: 20px;">
-        <div id="ball" style="width: 20px; height: 20px; border-radius: 50%; background: red; position: absolute; top: 0; left: 50%; transform: translateX(-50%);"></div>
-    </div>
 
-    <!-- Display: Outputs of the simulation -->
-    <div id="output">
-        <p id="elapsedTime">Elapsed Time: </p>
-        <p id="velocity">Velocity: </p>
-        <p id="force">Forces: </p>
+    <!-- Canvas for animation -->
+    <div style="position: relative; margin-top: 20px;">
+        <canvas id="simulationCanvas" width="300" height="300" style="border:1px solid #ccc;"></canvas>
+        <!-- Overlay box -->
+        <div id="dataBox" style="position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.9); padding: 10px; border: 1px solid #aaa; font-size: 14px;">
+            <p id="elapsedTime">Elapsed Time: </p>
+            <p id="velocity">Velocity: </p>
+            <p id="force">Forces: </p>
+        </div>
     </div>
 </body>
 </html>
