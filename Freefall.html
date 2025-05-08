@@ -13,15 +13,17 @@ It includes:
     <head>
         <meta charset="UTF-8" />
         <title>Freefall Simulation</title>
-        <link rel="stylesheet" href="FrefallStyles.css" /> <!-- Import CSS -->
-        <script src="FreefallScript.js" defer></script> <!-- Import JS -->
+        <link rel="stylesheet" href="FrefallStyles.css" />
+        <!-- Import CSS -->
+        <script src="FreefallScript.js" defer></script>
+        <!-- Import JS -->
     </head>
     <body>
         <h1 class="title">Freefall Simulation</h1>
         <p>Drag the ball up or down to set the height, then press play to simulate.</p>
 
         <form>
-           <!-- Set Unit, default to metric -->
+            <!-- Set Unit, default to metric -->
             <label>Unit:</label>
             <label><input type="radio" name="unit" value="metric" checked />Metric</label>
             <label><input type="radio" name="unit" value="imperial" />Imperial</label><br />
@@ -51,11 +53,8 @@ It includes:
                 <option value="air">Air</option>
             </select>
             <br />
-
-            <label
-                ><!-- Checkbox to enable/disable impact sound -->
-                <input type="checkbox" id="soundToggle" /> Play Sound on Impact</label
-            >
+            <!-- Checkbox to enable/disable impact sound -->
+            <label><input type="checkbox" id="soundToggle" /> Play Sound on Impact</label>
         </form>
 
         <button onclick="startSimulation()">Start Simulation</button>
