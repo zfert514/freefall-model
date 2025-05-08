@@ -1,63 +1,72 @@
+<!--
+Freefall Simulation HTML
+------------------------
+This HTML file builds the interface for the freefall simulation, including:
+- Input fields for initial height
+- Dropdown for selecting gravity (Earth, Moon, Mars, Vacuum, Custom)
+- Dropdown for selecting atmosphere (Air or Vacuum)
+- Start and Restart buttons
+- Display elements for elapsed time, velocity, and forces
+- A simple animated ball to represent the falling object
+-->
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <title>Freefall Simulation</title>
-        <link rel="stylesheet" href="styles.css" />
-        <script src="script.js" defer></script>
-    </head>
-    <body>
-        <h1 class="title">Freefall Simulation</h1>
-        <p>Set the parameters below and start the simulation.</p>
+<head>
+    <meta charset="UTF-8" />
+    <title>Freefall Simulation</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <h1 class="title">Freefall Simulation</h1>
+    <p>Set the parameters below and start the simulation.</p>
 
-        <form>
-            <label for="height">Height (m):</label>
-            <input type="number" id="height" name="height" value="10" min="0" />
-            <br />
+    <!-- Simulation Configuration Form -->
+    <form>
+        <!-- Input: Initial height in meters -->
+        <label for="height">Height (m):</label>
+        <input type="number" id="height" name="height" value="10" step="0.1" />
+        <br />
 
-            <label for="gravityType">Gravity:</label>
-            <select id="gravityType" onchange="setGravity()">
-                <option value="9.8">Earth (9.8 m/s²)</option>
-                <option value="1.62">Moon (1.62 m/s²)</option>
-                <option value="3.71">Mars (3.71 m/s²)</option>
-                <option value="0">Vacuum (0 m/s²)</option>
-                <option value="custom">Custom</option>
-            </select>
-            <input type="number" id="gravity" name="gravity" value="9.8" step="0.01" min="0" />
-            <br />
-            <label><input type="checkbox" id="soundToggle" /> Play Sound on Impact</label>
+        <!-- Dropdown: Select gravitational body or custom -->
+        <label for="gravityType">Gravity:</label>
+        <select id="gravityType" onchange="setGravity()">
+            <option value="9.8">Earth (9.8 m/s²)</option>
+            <option value="1.62">Moon (1.62 m/s²)</option>
+            <option value="3.71">Mars (3.71 m/s²)</option>
+            <option value="0">Vacuum (0 m/s²)</option>
+            <option value="custom">Custom</option>
+        </select>
+        <!-- Input: Custom gravity value -->
+        <input type="number" id="gravity" name="gravity" value="9.8" step="0.01" />
+        <br />
 
-            <br />
+        <!-- Dropdown: Atmosphere options -->
+        <label for="atmosphere">Atmosphere:</label>
+        <select id="atmosphere">
+            <option value="air">Air</option>
+            <option value="vacuum">Vacuum</option>
+        </select>
+        <br />
 
-            <label for="atmosphere">Atmosphere:</label>
-            <select id="atmosphere">
-                <option value="air">Air</option>
-                <option value="vacuum">Vacuum</option>
-            </select>
-            <br />
-        </form>
+        <!-- Checkbox: Enable sound on impact -->
+        <label><input type="checkbox" id="soundToggle" /> Play Sound on Impact</label>
+    </form>
 
-        <button onclick="startSimulation()">Start Simulation</button>
-        <button onclick="restartSimulation()">Restart Simulation</button>
+    <!-- Buttons: Start and Restart the simulation -->
+    <button onclick="startSimulation()">Start Simulation</button>
+    <button onclick="restartSimulation()">Restart Simulation</button>
 
-        <div id="animationArea" style="position: relative; height: 300px; border: 1px solid #ccc; margin-top: 20px">
-            <div
-                id="ball"
-                style="
-                    width: 20px;
-                    height: 20px;
-                    border-radius: 50%;
-                    background: red;
-                    position: absolute;
-                    top: 0;
-                    left: 50%;
-                    transform: translateX(-50%);
-                "></div>
-        </div>
-        <div id="output">
-            <p id="elapsedTime">Elapsed Time:</p>
-            <p id="velocity">Velocity:</p>
-            <p id="force">Forces:</p>
-        </div>
-    </body>
+    <!-- Display: Animated falling ball area -->
+    <div id="animationArea" style="position: relative; height: 300px; border: 1px solid #ccc; margin-top: 20px;">
+        <div id="ball" style="width: 20px; height: 20px; border-radius: 50%; background: red; position: absolute; top: 0; left: 50%; transform: translateX(-50%);"></div>
+    </div>
+
+    <!-- Display: Outputs of the simulation -->
+    <div id="output">
+        <p id="elapsedTime">Elapsed Time: </p>
+        <p id="velocity">Velocity: </p>
+        <p id="force">Forces: </p>
+    </div>
+</body>
 </html>
