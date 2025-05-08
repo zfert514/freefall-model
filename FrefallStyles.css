@@ -1,0 +1,19 @@
+/* This CSS file applies styling. */
+.title {
+  color: green;
+  font-size: 24px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+/* Sets the base style for a canvas with border */
+.canvas-base {
+    border: 1px solid #ccc;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+#overlayCanvas {
+    pointer-events: none;
+}

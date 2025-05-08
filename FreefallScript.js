@@ -1,10 +1,11 @@
-/* 
+/*
 Freefall Simulation with Canvas UI and Drag-to-Set Height
 ---------------------------------------------------------
 This script creates a two-canvas interactive simulation:
 - simulationCanvas: handles falling ball physics and animation.
 - overlayCanvas: displays velocity, elapsed time, and forces.
 - Users can drag the ball vertically before starting to simulate to set height.
+- Height is capped at 100ft
 */
 
 // Main interval ID for the simulation animation loop
@@ -13,13 +14,56 @@ let startTime = null;
 let isPaused = false;
 // Flag to track whether the user is currently dragging the red ball
 let isDragging = false;
-let ballY = 150;  // Initial Y center in canvas
-let height = 15;  // Default 15 meters (~50 ft)
+let ballY = 150; // Initial Y center in canvas
+let height = 15; // Default 15 meters (~50 ft)
 const maxMeters = 30.48; // 100 ft in meters
 
 let velocity = 0;
 let position = 0;
 let elapsed = 0;
+
+// Initialize ball position
+// On page load: draw the red ball and update the initial height readout.
+window.onload = () => {
+    initializeCanvas();
+    drawBall(ballY);
+    updateHeightFromY();
+};
+
+// Sets up canvas dimensions and styling dynamically
+function initializeCanvas() {
+    // Grab the canvases from document
+    const simCanvas = document.getElementById("simulationCanvas");
+    const overlayCanvas = document.getElementById("overlayCanvas");
+
+    // Set dimensions
+    simCanvas.width = 300;
+    simCanvas.height = 300;
+    overlayCanvas.width = 300;
+    overlayCanvas.height = 300;
+}
+
+// Draw the red ball at current Y
+// Draws the red ball at a given Y position in the simulation canvas.
+function drawBall(y) {
+    const canvas = document.getElementById("simulationCanvas");
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // Erases canvas each frame for animation
+    ctx.beginPath();
+    ctx.arc(canvas.width / 2, y, 10, 0, Math.PI * 2); // Creates ball centrally
+    ctx.fillStyle = "red";
+    ctx.fill();
+}
+
+// Converts Y-coordinate to height and updates the input field
+// Converts the Y position of the red ball in the canvas into a height (in meters).
+function updateHeightFromY() {
+    const canvas = document.getElementById("simulationCanvas");
+    const metersPerPixel = maxMeters / canvas.height;
+    height = (canvas.height - ballY) * metersPerPixel;
+    height = Math.max(0, Math.min(height, maxMeters));
+    document.getElementById("height").value = height.toFixed(2);
+}
 
 // Set gravity value from dropdown or allow custom
 function setGravity() {
@@ -61,28 +105,6 @@ function restartSimulation() {
     document.getElementById("pauseBtn").textContent = "Pause Simulation";
 
     drawBall(ballY);
-}
-
-// Converts Y-coordinate to height and updates the input field
-// Converts the Y position of the red ball in the canvas into a height (in meters).
-function updateHeightFromY() {
-    const canvas = document.getElementById("simulationCanvas");
-    const metersPerPixel = maxMeters / canvas.height;
-    height = (canvas.height - ballY) * metersPerPixel;
-    height = Math.max(0, Math.min(height, maxMeters));
-    document.getElementById("height").value = height.toFixed(2);
-}
-
-// Draw the red ball at current Y
-// Draws the red ball at a given Y position in the simulation canvas.
-function drawBall(y) {
-    const canvas = document.getElementById("simulationCanvas");
-    const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.beginPath();
-    ctx.arc(canvas.width / 2, y, 10, 0, Math.PI * 2);
-    ctx.fillStyle = "red";
-    ctx.fill();
 }
 
 // Draw data overlay
@@ -148,7 +170,7 @@ function startSimulation(resume = false) {
 
     const gravity = parseFloat(document.getElementById("gravity").value);
     const atmosphere = document.getElementById("atmosphere").value;
-    const dragCoefficient = (atmosphere === "air") ? 0.1 : 0;
+    const dragCoefficient = atmosphere === "air" ? 0.1 : 0;
     const canvas = document.getElementById("simulationCanvas");
     const overlay = document.getElementById("overlayCanvas");
     const pixelsPerMeter = canvas.height / maxMeters;
@@ -184,10 +206,3 @@ function startSimulation(resume = false) {
         }
     }, 50);
 }
-
-// Initialize ball position
-// On page load: draw the red ball and update the initial height readout.
-window.onload = () => {
-    drawBall(ballY);
-    updateHeightFromY();
-};
