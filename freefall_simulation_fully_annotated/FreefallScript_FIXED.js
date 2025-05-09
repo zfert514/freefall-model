@@ -1,25 +1,19 @@
-/*
-Freefall Simulation with Canvas UI and Drag-to-Set Height
----------------------------------------------------------
-This script creates a two-canvas interactive simulation:
-- simulationCanvas: handles falling ball physics and animation.
-- overlayCanvas: displays velocity, elapsed time, and forces.
-- Users can drag the ball vertically before starting to simulate to set height.
-- Height is capped at 100ft
+
+/* Freefall Simulation with Canvas UI and Drag-to-Set Height
+   ---------------------------------------------------------
+   Fixes:
+   - Moves all DOM and canvas references inside window.onload
+   - Ensures ball stops at position <= 0
+   - Displays drag and gravity on overlay
+   - Initializes and updates canvases properly
 */
 
-/* ============================
-   GLOBAL VARIABLES & SETTINGS
-   ============================ */
-// Main interval ID for the simulation animation loop
 let intervalId = null;
-let startTime = null;
 let isPaused = false;
-// Flag to track whether the user is currently dragging the red ball
 let isDragging = false;
-let ballY = 150; // Initial Y center in canvas
-let height = 15; // Default 15 meters (~50 ft)
-const maxMeters = 30.48; // 100 ft in meters
+let ballY = 150;
+let height = 15;
+const maxMeters = 30.48; // 100ft
 
 let velocity = 0;
 let position = 0;
@@ -27,22 +21,10 @@ let elapsed = 0;
 
 // Declare DOM elements globally
 let simCanvas, overlayCanvas, simCtx, overlayCtx;
-let heightInput,
-    gravityInput,
-    gravitySelect,
-    atmosphereSelect,
-    elapsedTimeDisplay,
-    velocityDisplay,
-    forceDisplay,
-    pauseBtn;
+let heightInput, gravityInput, gravitySelect, atmosphereSelect, elapsedTimeDisplay, velocityDisplay, forceDisplay, pauseBtn;
 
-/* ============================
-   PAGE LOAD
-   ============================ */
-// Initialize ball position
-// On page load: draw the red ball and update the initial height readout.
 window.onload = () => {
-    // Get canvas
+    // Get canvas and UI elements
     simCanvas = document.getElementById("simulationCanvas");
     overlayCanvas = document.getElementById("overlayCanvas");
     simCtx = simCanvas.getContext("2d");
@@ -52,7 +34,6 @@ window.onload = () => {
     simCanvas.width = overlayCanvas.width = 300;
     simCanvas.height = overlayCanvas.height = 300;
 
-    // Get UI elements
     heightInput = document.getElementById("height");
     gravityInput = document.getElementById("gravity");
     gravitySelect = document.getElementById("gravityType");
@@ -62,37 +43,27 @@ window.onload = () => {
     forceDisplay = document.getElementById("force");
     pauseBtn = document.getElementById("pauseBtn");
 
-    // Setup Canvas
     drawBall(ballY);
-    updateHeight();
+    updateHeightFromY();
     setupDragEvents();
-    drawOverlay(0, 0, 0, 0);
 };
 
-/* ============================
-   UTILITY FUNCTIONS
-   ============================ */
-// Converts Y-coordinate to height and updates the input field
-// Converts the Y position of the red ball in the canvas into a height (in meters) to 2 decimal points.
-function updateHeight() {
+/* === Utility Functions === */
+function updateHeightFromY() {
     const metersPerPixel = maxMeters / simCanvas.height;
     height = (simCanvas.height - ballY) * metersPerPixel;
     height = Math.max(0, Math.min(height, maxMeters));
     heightInput.value = height.toFixed(2);
 }
 
-// Draw the red ball at current Y
-// Draws the red ball at a given Y position in the simulation canvas.
 function drawBall(y) {
-    simCtx.clearRect(0, 0, simCanvas.width, simCanvas.height); // Erases canvas each frame for animation
+    simCtx.clearRect(0, 0, simCanvas.width, simCanvas.height);
     simCtx.beginPath();
-    simCtx.arc(simCanvas.width / 2, y, 10, 0, Math.PI * 2); // Creates ball centrally
+    simCtx.arc(simCanvas.width / 2, y, 10, 0, Math.PI * 2);
     simCtx.fillStyle = "red";
     simCtx.fill();
 }
 
-// Draw data overlay
-// Draws simulation data such as elapsed time, velocity, gravity, and drag on the overlay canvas.
 function drawOverlay(elapsed, velocity, gravity, drag) {
     overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
     overlayCtx.font = "12px sans-serif";
@@ -103,11 +74,7 @@ function drawOverlay(elapsed, velocity, gravity, drag) {
     overlayCtx.fillText(`Drag: ${drag.toFixed(2)} m/s²`, 10, 80);
 }
 
-/* ============================
-   DRAG FUNCTIONALITY
-   ============================ */
-// Allow dragging the ball
-// Handles mouse down event to detect if the user starts dragging the red ball.
+/* === Drag Events === */
 function setupDragEvents() {
     simCanvas.addEventListener("mousedown", (e) => {
         const rect = simCanvas.getBoundingClientRect();
@@ -118,13 +85,12 @@ function setupDragEvents() {
         }
     });
 
-    // Handles mouse movement while dragging to reposition the red ball and update height.
     window.addEventListener("mousemove", (e) => {
         if (!isDragging) return;
         const rect = simCanvas.getBoundingClientRect();
         ballY = Math.max(0, Math.min(e.clientY - rect.top, simCanvas.height));
         drawBall(ballY);
-        updateHeight();
+        updateHeightFromY();
     });
 
     window.addEventListener("mouseup", () => {
@@ -132,10 +98,7 @@ function setupDragEvents() {
     });
 }
 
-/* ============================
-   SIMULATION LOGIC
-   ============================ */
-// Set gravity value from dropdown or allow custom
+/* === Simulation Logic === */
 function setGravity() {
     if (gravitySelect.value === "custom") {
         gravityInput.removeAttribute("disabled");
@@ -145,14 +108,23 @@ function setGravity() {
     }
 }
 
-// Start simulation; if resume=true, use current velocity/position
-// Starts or resumes the simulation depending on the 'resume' flag.
+function pauseSimulation() {
+    if (!isPaused) {
+        clearInterval(intervalId);
+        isPaused = true;
+        pauseBtn.textContent = "Resume Simulation";
+    } else {
+        isPaused = false;
+        pauseBtn.textContent = "Pause Simulation";
+        startSimulation(true);
+    }
+}
+
 function startSimulation(resume = false) {
     clearInterval(intervalId);
-    isPaused = false;
 
     const gravity = parseFloat(gravityInput.value);
-    const dragCoefficient = atmosphereSelect.value === "air" ? 0.1 : 0;
+    const dragCoefficient = (atmosphereSelect.value === "air") ? 0.1 : 0;
     const pixelsPerMeter = simCanvas.height / maxMeters;
 
     pauseBtn.disabled = false;
@@ -174,11 +146,9 @@ function startSimulation(resume = false) {
         velocity += netAccel * 0.05;
         position -= velocity * 0.05;
 
-        // Update animation
         if (position <= 0) {
             position = 0;
             clearInterval(intervalId);
-            playImpactSound();
             pauseBtn.disabled = true;
         }
 
@@ -188,21 +158,6 @@ function startSimulation(resume = false) {
     }, 50);
 }
 
-// Pause/resume toggle
-// Toggles the simulation between paused and resumed states.
-function pauseSimulation() {
-    if (!isPaused) {
-        clearInterval(intervalId);
-        isPaused = !isPaused;
-        pauseBtn.textContent = "Resume Simulation";
-    } else {
-        pauseBtn.textContent = "Pause Simulation";
-        isPaused = !isPaused;
-        startSimulation(true);
-    }
-}
-
-// Restart everything, reset ball to center
 function restartSimulation() {
     clearInterval(intervalId);
     pauseBtn.disabled = true;
@@ -214,17 +169,6 @@ function restartSimulation() {
     ballY = simCanvas.height / 2;
 
     drawBall(ballY);
-    updateHeight();
+    updateHeightFromY();
     overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-    drawOverlay(0, 0, 0, 0);
-}
-
-/* ============================
-   EXTRA CONTROLS
-   ============================ */
-// Play sound if toggle is enabled
-function playImpactSound() {
-    if (!document.getElementById("soundToggle").checked) return;
-    const audio = new Audio("https://www.soundjay.com/mechanical/sounds/metal-impact-1.mp3");
-    audio.play();
 }
