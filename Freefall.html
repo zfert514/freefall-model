@@ -25,12 +25,13 @@ It includes:
         <form>
             <!-- Set Unit, default to metric -->
             <label>Unit:</label>
-            <label><input type="radio" name="unit" value="metric" checked />Metric</label>
-            <label><input type="radio" name="unit" value="imperial" />Imperial</label><br />
+            <label><input type="radio" id="unitM" name="unit" value="metric" onchange="changeUnit()" checked />Metric</label>
+            <label><input type="radio" id="unitFt" name="unit" value="imperial" onchange="changeUnit()" />Imperial</label><br />
             <!-- Display current height -->
-            <label for="height">Height (m):</label>
+            <label for="height">Height:</label>
             <!-- input for height (updated by dragging the ball or input) -->
             <input type="number" id="height" name="height" value="15" step="0.1" min="0"/>
+            <span id="heightLabel">m</span>
             <br />
 
             <label for="gravityType">Gravity:</label>
@@ -44,6 +45,7 @@ It includes:
             </select>
             <!-- Custom gravity input (starts disabled enabled only when "Custom" is selected) -->
             <input type="number" id="gravity" name="gravity" value="9.8" step="0.01" min="0" disabled />
+            <span id="gravityLabel">m/s<sup>2</sup></span>
             <br />
 
             <label for="atmosphere">Atmosphere:</label>

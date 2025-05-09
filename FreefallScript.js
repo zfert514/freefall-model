@@ -20,6 +20,10 @@ let isDragging = false;
 let ballY = 150; // Initial Y center in canvas
 let height = 15; // Default 15 meters (~50 ft)
 const maxMeters = 30.48; // 100 ft in meters
+let ballSize = 10; // Radius of the ball
+let ruler = 20; // Length of the ruler
+const conversionCoefficient = 3.28084;
+let isMetric = true;
 
 let velocity = 0;
 let position = 0;
@@ -34,7 +38,9 @@ let heightInput,
     elapsedTimeDisplay,
     velocityDisplay,
     forceDisplay,
-    pauseBtn;
+    pauseBtn,
+    heightLabel,
+    gravityLabel;
 
 /* ============================
    PAGE LOAD
@@ -42,7 +48,7 @@ let heightInput,
 // Initialize ball position
 // On page load: draw the red ball and update the initial height readout.
 window.onload = () => {
-    // Get canvas
+    // Get canvas and canvas set context
     simCanvas = document.getElementById("simulationCanvas");
     overlayCanvas = document.getElementById("overlayCanvas");
     simCtx = simCanvas.getContext("2d");
@@ -61,88 +67,151 @@ window.onload = () => {
     velocityDisplay = document.getElementById("velocity");
     forceDisplay = document.getElementById("force");
     pauseBtn = document.getElementById("pauseBtn");
+    gravityLabel = document.getElementById("heightLabel");
+    heightLabel = document.getElementById("gravityLabel");
+    //unitSelect = document.getElementById("unit");
 
     // Setup Canvas
     drawBall(ballY);
     updateHeight();
-    setupDragEvents();
-    drawOverlay(0, 0, 0, 0);
+    setupListeners();
+    drawOverlay(0, 0, 0, 0, parseFloat(heightInput.value));
+    drawRuler();
 };
 
 /* ============================
    UTILITY FUNCTIONS
    ============================ */
+// Change unit between m and ft
+function changeUnit() {
+    isMetric = !isMetric;
+    if (isMetric) {
+        drawOverlay(0, 0, 0, 0, height);
+    } else {
+        drawOverlay(0, 0, 0, 0, convert(height));
+    }
+}
+
+function convert(meter) {
+    return meter * conversionCoefficient;
+}
+
 // Converts Y-coordinate to height and updates the input field
 // Converts the Y position of the red ball in the canvas into a height (in meters) to 2 decimal points.
 function updateHeight() {
     const metersPerPixel = maxMeters / simCanvas.height;
     height = (simCanvas.height - ballY) * metersPerPixel;
-    height = Math.max(0, Math.min(height, maxMeters));
-    heightInput.value = height.toFixed(2);
+    if (isMetric) {
+        heightInput.value = height.toFixed(2);
+        drawOverlay(0, 0, 0, 0, height);
+    } else {
+        heightInput.value = convert(height).toFixed(2);
+        drawOverlay(0, 0, 0, 0, convert(height));
+    }
+}
+
+// Create Height Comparisons starting with human height
+function drawRuler() {
+    // Create Ruler
+    simCtx.beginPath();
+    simCtx.moveTo(simCanvas.width, simCanvas.height / 2);
+    simCtx.lineTo(simCanvas.width - ruler, simCanvas.height / 2);
+    simCtx.stroke();
 }
 
 // Draw the red ball at current Y
 // Draws the red ball at a given Y position in the simulation canvas.
 function drawBall(y) {
-    simCtx.clearRect(0, 0, simCanvas.width, simCanvas.height); // Erases canvas each frame for animation
+    simCtx.clearRect(0, 0, simCanvas.width - ruler, simCanvas.height); // Erases canvas each frame for animation
+
+    // Keep y between ballSize and canvas height - ballSize
+    y = Math.max(ballSize, Math.min(simCanvas.height - ballSize, y));
+
     simCtx.beginPath();
-    simCtx.arc(simCanvas.width / 2, y, 10, 0, Math.PI * 2); // Creates ball centrally
+    simCtx.arc(simCanvas.width / 2, y, ballSize, 0, Math.PI * 2); // Creates ball centrally
     simCtx.fillStyle = "red";
     simCtx.fill();
 }
 
 // Draw data overlay
 // Draws simulation data such as elapsed time, velocity, gravity, and drag on the overlay canvas.
-function drawOverlay(elapsed, velocity, gravity, drag) {
+function drawOverlay(elapsed, velocity, gravity, drag, height) {
     overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
     overlayCtx.font = "12px sans-serif";
     overlayCtx.fillStyle = "black";
     overlayCtx.fillText(`Elapsed: ${elapsed.toFixed(2)}s`, 10, 20);
-    overlayCtx.fillText(`Velocity: ${velocity.toFixed(2)} m/s`, 10, 40);
-    overlayCtx.fillText(`Drag: ${drag.toFixed(2)} m/s²`, 10, 60);
-    //overlayCtx.fillText(`Gravity: ${gravity.toFixed(2)} m/s²`, 10, 80);
+    if (isMetric) {
+        overlayCtx.fillText(`Velocity: ${velocity.toFixed(2)} m/s`, 10, 40);
+        overlayCtx.fillText(`Height: ${height.toFixed(2)} m`, 10, 60);
+        if (atmosphereSelect.value == "air") {
+            overlayCtx.fillText(`Drag: ${drag.toFixed(2)} m/s²`, 10, 80);
+        }
+        //overlayCtx.fillText(`Gravity: ${gravity.toFixed(2)} m/s²`, 10, 80);
+    } else {
+        overlayCtx.fillText(`Velocity: ${convert(velocity).toFixed(2)} ft/s`, 10, 40);
+        overlayCtx.fillText(`Height: ${height.toFixed(2)} ft`, 10, 60);
+        if (atmosphereSelect.value == "air") {
+            overlayCtx.fillText(`Drag: ${convert(drag).toFixed(2)} ft/s²`, 10, 80);
+        }
+        //overlayCtx.fillText(`Gravity: ${gravity.toFixed(2)} m/s²`, 10, 80);
+    }
+}
+
+// Moves ball when height input is changed
+function repsoitionBall() {
+    // Get new height value
+    const newHeight = parseFloat(document.getElementById("height").value);
+
+    // Convert to canvas Y position
+    const pixelsPerMeter = simCanvas.height / maxMeters;
+    ballY = simCanvas.height - newHeight * pixelsPerMeter;
+
+    drawBall(ballY); // Update ball position
+    updateHeight(); // Recalculate height from Y if needed
 }
 
 /* ============================
    DRAG FUNCTIONALITY
    ============================ */
+// Find if mouse is near circle
+function checkMouse(e) {
+    const rect = simCanvas.getBoundingClientRect(); // Get canvas position
+    const x = e.clientX - rect.left; // Get mouse x relative to canvas
+    const y = e.clientY - rect.top; // Get mouse y relative to canvas
+    if (Math.abs(x - simCanvas.width / 2) < 15 && Math.abs(y - ballY) < 15) {
+        isDragging = true; // If the mouse is within 15px ball center allow drag
+    }
+}
+
+// Handles mouse movement within canvas while dragging to reposition the red ball and update height.
+function dragBall(e) {
+    if (!isDragging) return;
+    const rect = simCanvas.getBoundingClientRect();
+    ballY = Math.max(0, Math.min(e.clientY - rect.top, simCanvas.height));
+    drawBall(ballY);
+    updateHeight();
+}
+
 // Allow dragging the ball
 // Handles mouse down event to detect if the user starts dragging the red ball.
-function setupDragEvents() {
+function setupListeners() {
+    // DRAG EVENTS
     simCanvas.addEventListener("mousedown", (e) => {
-        const rect = simCanvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        if (Math.abs(x - simCanvas.width / 2) < 15 && Math.abs(y - ballY) < 15) {
-            isDragging = true;
-        }
+        checkMouse(e);
     });
 
-    // Handles mouse movement while dragging to reposition the red ball and update height.
     simCanvas.addEventListener("mousemove", (e) => {
-        if (!isDragging) return;
-        const rect = simCanvas.getBoundingClientRect();
-        ballY = Math.max(0, Math.min(e.clientY - rect.top, simCanvas.height));
-        drawBall(ballY);
-        updateHeight();
+        dragBall(e);
     });
 
-    simCanvas.addEventListener("mouseup", () => {
+    // Window in case mouseup happens outside of canvas
+    window.addEventListener("mouseup", () => {
         isDragging = false;
     });
 
-    // Moves ball when height input is changed
+    // INPUT EVENTS
     heightInput.addEventListener("input", () => {
-        // Get new height value
-        const newHeight = parseFloat(document.getElementById("height").value);
-
-        // Convert to canvas Y position
-        const maxMeters = 30.48;
-        const pixelsPerMeter = canvas.height / maxMeters;
-        ballY = simCanvas.height - newHeight * pixelsPerMeter;
-
-        drawBall(ballY); // Update ball position
-        updateHeight(); // Recalculate height from Y if needed
+        repsoitionBall();
     });
 }
 
@@ -203,7 +272,7 @@ function startSimulation(resume = false) {
 
         const y = simCanvas.height - position * pixelsPerMeter;
         drawBall(Math.min(simCanvas.height - 10, y));
-        drawOverlay(elapsed, velocity, gravity, dragForce);
+        drawOverlay(elapsed, velocity, gravity, dragForce, position);
     }, 50);
 }
 
@@ -240,7 +309,7 @@ function restartSimulation() {
     drawBall(ballY);
     updateHeight();
     overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-    drawOverlay(0, 0, 0, 0);
+    drawOverlay(0, 0, 0, 0, height);
 }
 
 /* ============================
