@@ -99,8 +99,8 @@ function drawOverlay(elapsed, velocity, gravity, drag) {
     overlayCtx.fillStyle = "black";
     overlayCtx.fillText(`Elapsed: ${elapsed.toFixed(2)}s`, 10, 20);
     overlayCtx.fillText(`Velocity: ${velocity.toFixed(2)} m/s`, 10, 40);
-    overlayCtx.fillText(`Gravity: ${gravity.toFixed(2)} m/s²`, 10, 60);
-    overlayCtx.fillText(`Drag: ${drag.toFixed(2)} m/s²`, 10, 80);
+    overlayCtx.fillText(`Drag: ${drag.toFixed(2)} m/s²`, 10, 60);
+    //overlayCtx.fillText(`Gravity: ${gravity.toFixed(2)} m/s²`, 10, 80);
 }
 
 /* ============================
@@ -119,7 +119,7 @@ function setupDragEvents() {
     });
 
     // Handles mouse movement while dragging to reposition the red ball and update height.
-    window.addEventListener("mousemove", (e) => {
+    simCanvas.addEventListener("mousemove", (e) => {
         if (!isDragging) return;
         const rect = simCanvas.getBoundingClientRect();
         ballY = Math.max(0, Math.min(e.clientY - rect.top, simCanvas.height));
@@ -127,8 +127,22 @@ function setupDragEvents() {
         updateHeight();
     });
 
-    window.addEventListener("mouseup", () => {
+    simCanvas.addEventListener("mouseup", () => {
         isDragging = false;
+    });
+
+    // Moves ball when height input is changed
+    heightInput.addEventListener("input", () => {
+        // Get new height value
+        const newHeight = parseFloat(document.getElementById("height").value);
+
+        // Convert to canvas Y position
+        const maxMeters = 30.48;
+        const pixelsPerMeter = canvas.height / maxMeters;
+        ballY = simCanvas.height - newHeight * pixelsPerMeter;
+
+        drawBall(ballY); // Update ball position
+        updateHeight(); // Recalculate height from Y if needed
     });
 }
 
@@ -150,6 +164,11 @@ function setGravity() {
 function startSimulation(resume = false) {
     clearInterval(intervalId);
     isPaused = false;
+
+    heightInput.disabled = true;
+    gravityInput.disabled = true;
+    gravitySelect.disabled = true;
+    atmosphereSelect.disabled = true;
 
     const gravity = parseFloat(gravityInput.value);
     const dragCoefficient = atmosphereSelect.value === "air" ? 0.1 : 0;
@@ -207,6 +226,11 @@ function restartSimulation() {
     clearInterval(intervalId);
     pauseBtn.disabled = true;
     pauseBtn.textContent = "Pause Simulation";
+
+    heightInput.disabled = false;
+    gravityInput.disabled = false;
+    gravitySelect.disabled = false;
+    atmosphereSelect.disabled = false;
 
     velocity = 0;
     position = 0;
