@@ -19,6 +19,7 @@ let isPaused = false;
 let isDragging = false;
 let ballY = 150; // Initial Y center in canvas
 let height = 15; // Default 15 meters (~50 ft)
+let currBallHeight = 15;
 const maxMeters = 30.48; // 100 ft in meters
 let ballSize = 10; // Radius of the ball
 let ruler = 20; // Length of the ruler
@@ -28,6 +29,8 @@ let isMetric = true;
 let velocity = 0;
 let position = 0;
 let elapsed = 0;
+let gravity = 9.8;
+let drag = 0;
 
 // Declare DOM elements globally
 let simCanvas, overlayCanvas, simCtx, overlayCtx;
@@ -69,7 +72,7 @@ window.onload = () => {
     pauseBtn = document.getElementById("pauseBtn");
     gravityLabel = document.getElementById("heightLabel");
     heightLabel = document.getElementById("gravityLabel");
-    //unitSelect = document.getElementById("unit");
+    unitSelect = document.getElementById("unit");
 
     // Setup Canvas
     drawBall(ballY);
@@ -85,10 +88,17 @@ window.onload = () => {
 // Change unit between m and ft
 function changeUnit() {
     isMetric = !isMetric;
-    if (isMetric) {
-        drawOverlay(0, 0, 0, 0, height);
+    // Allows for change during simulation
+    if (velocity > 0) {
+        drawOverlay(elapsed, velocity, gravity, drag, position);
     } else {
-        drawOverlay(0, 0, 0, 0, convert(height));
+        drawOverlay(elapsed, velocity, gravity, drag, height);
+    }
+    // Changes height input
+    if (isMetric) {
+        heightInput.value = height.toFixed(2);
+    } else {
+        heightInput.value = convert(height).toFixed(2);
     }
 }
 
@@ -103,11 +113,10 @@ function updateHeight() {
     height = (simCanvas.height - ballY) * metersPerPixel;
     if (isMetric) {
         heightInput.value = height.toFixed(2);
-        drawOverlay(0, 0, 0, 0, height);
     } else {
         heightInput.value = convert(height).toFixed(2);
-        drawOverlay(0, 0, 0, 0, convert(height));
     }
+    drawOverlay(elapsed, velocity, gravity, drag, height);
 }
 
 // Create Height Comparisons starting with human height
@@ -149,7 +158,7 @@ function drawOverlay(elapsed, velocity, gravity, drag, height) {
         //overlayCtx.fillText(`Gravity: ${gravity.toFixed(2)} m/s²`, 10, 80);
     } else {
         overlayCtx.fillText(`Velocity: ${convert(velocity).toFixed(2)} ft/s`, 10, 40);
-        overlayCtx.fillText(`Height: ${height.toFixed(2)} ft`, 10, 60);
+        overlayCtx.fillText(`Height: ${convert(height).toFixed(2)} ft`, 10, 60);
         if (atmosphereSelect.value == "air") {
             overlayCtx.fillText(`Drag: ${convert(drag).toFixed(2)} ft/s²`, 10, 80);
         }
@@ -212,6 +221,10 @@ function setupListeners() {
     // INPUT EVENTS
     heightInput.addEventListener("input", () => {
         repsoitionBall();
+    });
+
+    document.querySelectorAll('input[name="unit"]').forEach((radio) => {
+        radio.addEventListener("change", changeUnit);
     });
 }
 
