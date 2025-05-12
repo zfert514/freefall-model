@@ -1,17 +1,109 @@
 /* This CSS file applies styling. */
-.title {
-  color: green;
-  font-size: 24px;
-  text-align: center;
-  margin-bottom: 10px;
+* {
+    padding: 0;
+    margin: 0;
+    text-align: center;
+}
+
+/* Remove blue flash when click happens */
+header {
+    line-height: 0.6;
+    background: #777bfd;
+    display: inline-flexbox;
+    padding: 50px;
+}
+
+body {
+    font-family: "Patrick Hand", Helvetica, Arial;
+    background: #91daff;
+    color: #333;
+}
+
+button {
+    font-family: "Patrick Hand", Helvetica, Arial;
+    background: rgb(20, 176, 255);
+    font-size: medium;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border-radius: 8px;
+}
+
+.lesson {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    text-align: left;
+}
+.lesson img {
+    flex-shrink: 0;
+    width: 150px;
+    float: left;
+}
+
+.heading {
+    font-size: xx-large;
+}
+
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.main {
+    margin: 0;
+    padding: 20px;
+    max-width: 600px;
+}
+
+.noSelect {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+.noSelect:focus {
+    outline: none !important;
+}
+
+.overlayCanvases {
+    position: relative;
+    width: fit-content;
+    margin: auto auto;
 }
 
 /* Sets the base style for a canvas with border */
 .canvas-base {
-    border: 1px solid #ccc;
+    border: 1px solid #000000;
+    display: block;
+    margin: 0 auto; /* This centers the canvas horizontally */
     position: absolute;
-    left: 0;
-    top: 0;
+    left: -150px;
+    top: 20px;
+}
+
+.patrick-hand-regular {
+    font-family: "Patrick Hand", cursive;
+    font-weight: 400;
+    font-style: normal;
+}
+
+.title {
+    font-size: 50px;
+    margin-bottom: 25px;
+}
+
+.subtitle {
+    font-size: 20px;
+    text-align: center;
 }
 
 #overlayCanvas {

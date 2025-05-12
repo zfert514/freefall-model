@@ -19,7 +19,6 @@ let isPaused = false;
 let isDragging = false;
 let ballY = 150; // Initial Y center in canvas
 let height = 15; // Default 15 meters (~50 ft)
-let currBallHeight = 15;
 const maxMeters = 30.48; // 100 ft in meters
 let ballSize = 10; // Radius of the ball
 let ruler = 20; // Length of the ruler
@@ -257,7 +256,7 @@ function startSimulation(resume = false) {
     const pixelsPerMeter = simCanvas.height / maxMeters;
 
     pauseBtn.disabled = false;
-    pauseBtn.textContent = "Pause Simulation";
+    pauseBtn.textContent = "Pause";
 
     if (!resume) {
         velocity = 0;
@@ -295,9 +294,9 @@ function pauseSimulation() {
     if (!isPaused) {
         clearInterval(intervalId);
         isPaused = !isPaused;
-        pauseBtn.textContent = "Resume Simulation";
+        pauseBtn.textContent = "Resume";
     } else {
-        pauseBtn.textContent = "Pause Simulation";
+        pauseBtn.textContent = "Pause";
         isPaused = !isPaused;
         startSimulation(true);
     }
@@ -307,7 +306,7 @@ function pauseSimulation() {
 function restartSimulation() {
     clearInterval(intervalId);
     pauseBtn.disabled = true;
-    pauseBtn.textContent = "Pause Simulation";
+    pauseBtn.textContent = "Pause";
 
     heightInput.disabled = false;
     gravityInput.disabled = false;
@@ -333,4 +332,12 @@ function playImpactSound() {
     if (!document.getElementById("soundToggle").checked) return;
     const audio = new Audio("https://www.soundjay.com/mechanical/sounds/metal-impact-1.mp3");
     audio.play();
+}
+
+/* ============================
+   EXTRA CONTROLS
+   ============================ */
+//s
+function nextText() {
+
 }
