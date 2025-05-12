@@ -25,13 +25,22 @@ body {
 
 button {
     font-family: "Patrick Hand", Helvetica, Arial;
-    background: rgb(20, 176, 255);
     font-size: medium;
     padding-left: 15px;
     padding-right: 15px;
     padding-top: 5px;
     padding-bottom: 5px;
     border-radius: 8px;
+    background: rgb(20, 176, 255);
+}
+
+#nextBtn {
+    opacity: 100%;
+    width: 200px;
+}
+
+#simulation {
+    display: none;
 }
 
 .lesson {
@@ -103,11 +112,15 @@ button {
 .title {
     font-size: 50px;
     margin-bottom: 25px;
+    position: relative;
+    z-index: 1;
 }
 
 .subtitle {
     font-size: 20px;
     text-align: center;
+    position: relative;
+    z-index: 1;
 }
 
 #overlayCanvas {
@@ -115,9 +128,19 @@ button {
 }
 
 #appleCanvas {
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    z-index: 0;
+    height: 100%;
+    z-index: 0; /* Lower z-index puts it behind other header content */
     pointer-events: none;
 }
 
+#dropItemSelect {
+    display: flex;
+}
+
+#dropItemSelect img {
+    width: 75px;
+}

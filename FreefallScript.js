@@ -8,9 +8,19 @@ This script creates a two-canvas interactive simulation:
 - Height is capped at 100ft
 */
 
-/* ============================
+/* ==============================================================================================
    GLOBAL VARIABLES & SETTINGS
-   ============================ */
+   ============================================================================================== */
+// Script
+const headings = ["What Goes Up...", "A Quick Game"];
+const scripts = [
+    "When we drop something, we know it falls to the ground. But have you ever stopped to wonder why? Maybe you've heard of \"gravity\", the force that keeps us on the ground. Let's learn a little more about how that works.",
+    "Let's try something. I'm going to drop my friend Mr. Apple and you choose one of the items below to drop. Try to choose something that will fall faster than Mr. Apple."
+];
+const instructions = ["Drag the ball up or down to set the height, then press play to simulate.", ""];
+const images = ["img/svg/newton_point.svg", "img/svg/newton_point.svg", "img/svg/newton_point.svg", "img/svg/newton_point.svg", "img/svg/newton_point.svg"];
+let pageCount = 0;
+
 // Main interval ID for the simulation animation loop
 let intervalId = null;
 let startTime = null;
@@ -32,7 +42,7 @@ let gravity = 9.8;
 let drag = 0;
 
 // Declare DOM elements globally
-let simCanvas, overlayCanvas, simCtx, overlayCtx;
+let simCanvas, overlayCanvas, appleCanvas, simCtx, overlayCtx, appleCtx;
 let heightInput,
     gravityInput,
     gravitySelect,
@@ -41,19 +51,26 @@ let heightInput,
     velocityDisplay,
     forceDisplay,
     pauseBtn,
+    nextBtn,
     heightLabel,
     gravityLabel,
-    header;
+    header,
+    introText,
+    headingText,
+    instructionText,
+    isaacNewton;
 
-/* ============================
+/* ==============================================================================================
    PAGE LOAD
-   ============================ */
+   ============================================================================================== */
 // Initialize ball position
 // On page load: draw the red ball and update the initial height readout.
 window.onload = () => {
     // Get canvas and canvas set context
     simCanvas = document.getElementById("simulationCanvas");
     overlayCanvas = document.getElementById("overlayCanvas");
+    appleCanvas = document.getElementById("appleCanvas");
+    appleCtx = appleCanvas.getContext("2d");
     simCtx = simCanvas.getContext("2d");
     overlayCtx = overlayCanvas.getContext("2d");
 
@@ -73,7 +90,12 @@ window.onload = () => {
     gravityLabel = document.getElementById("heightLabel");
     heightLabel = document.getElementById("gravityLabel");
     unitSelect = document.getElementById("unit");
-    header = document.querySelector('header');
+    headingText = document.getElementById("heading");
+    introText = document.getElementById("intro");
+    instructionText = document.getElementById("instruction");
+    nextBtn = document.getElementById("nextBtn");
+    isaacNewton = document.getElementById("isaacNewton");
+    header = document.querySelector("header");
 
     // Setup Canvas
     drawBall(ballY);
@@ -83,9 +105,9 @@ window.onload = () => {
     drawRuler();
 };
 
-/* ============================
+/* ==============================================================================================
    UTILITY FUNCTIONS
-   ============================ */
+   ============================================================================================== */
 // Change unit between m and ft
 function changeUnit() {
     isMetric = !isMetric;
@@ -180,9 +202,9 @@ function repsoitionBall() {
     updateHeight(); // Recalculate height from Y if needed
 }
 
-/* ============================
+/* ==============================================================================================
    DRAG FUNCTIONALITY
-   ============================ */
+   ============================================================================================== */
 // Find if mouse is near circle
 function checkMouse(e) {
     const rect = simCanvas.getBoundingClientRect(); // Get canvas position
@@ -229,9 +251,9 @@ function setupListeners() {
     });
 }
 
-/* ============================
+/* ==============================================================================================
    SIMULATION LOGIC
-   ============================ */
+   ============================================================================================== */
 // Set gravity value from dropdown or allow custom
 function setGravity() {
     if (gravitySelect.value === "custom") {
@@ -326,9 +348,9 @@ function restartSimulation() {
     drawOverlay(0, 0, 0, 0, height);
 }
 
-/* ============================
+/* ==============================================================================================
    EXTRA CONTROLS
-   ============================ */
+   ============================================================================================== */
 // Play sound if toggle is enabled
 function playImpactSound() {
     if (!document.getElementById("soundToggle").checked) return;
@@ -336,17 +358,24 @@ function playImpactSound() {
     audio.play();
 }
 
-/* ============================
-   EXTRA CONTROLS
-   ============================ */
-//s
-function nextText() {
-
+// Go to Next Section
+function nextSlide() {
+    if (pageCount <= headings.length - 1) {
+        headingText.textContent = headings[pageCount];
+        introText.textContent = scripts[pageCount];
+        instructionText.textContent = instructions[pageCount];
+        isaacNewton.src = images[pageCount];
+        if (pageCount == 1) {
+            nextBtn.disabled = true;
+        }
+        pageCount += 1;
+    }
 }
 
-// === Falling Apple Banner Animation ===
-const canvas = document.getElementById('appleCanvas');
-const ctx = canvas.getContext('2d');
+/* ==============================================================================================
+   FALLING APPLE ANIMATION
+   ============================================================================================== */
+appleCanvas = document.getElementById("appleCanvas");
 
 let appleImg = new Image();
 appleImg.src = "img/svg/apple_1.svg";
@@ -355,15 +384,15 @@ let apple = null;
 let lastTime = 0;
 
 function resizeCanvas() {
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
+    appleCanvas.width = appleCanvas.offsetWidth;
+    appleCanvas.height = appleCanvas.offsetHeight;
 }
 
-window.addEventListener('resize', resizeCanvas);
+window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 
 function spawnApple() {
-    const x = Math.random() * canvas.width;
+    const x = Math.random() * appleCanvas.width;
     apple = {
         x,
         y: -50,
@@ -391,11 +420,11 @@ function updateApple(dt) {
     });
 
     // Bounce
-    const ground = canvas.height - 40;
+    const ground = appleCanvas.height - 40;
     if (apple.y >= ground && !apple.bounced) {
         apple.vy = -0.4 * Math.sqrt(apple.vy);
         apple.bounced = true;
-    } else if (apple.y > canvas.height + 50) {
+    } else if (apple.y > appleCanvas.height + 50) {
         apple = null;
         setTimeout(spawnApple, 1000);
     }
@@ -406,24 +435,24 @@ function drawApple() {
 
     // Draw trail
     for (let t of apple.trail) {
-        ctx.globalAlpha = t.opacity * 0.5;
-        ctx.drawImage(appleImg, t.x - 20, t.y - 20, 40, 40);
+        appleCtx.globalAlpha = t.opacity * 0.5;
+        appleCtx.drawImage(appleImg, t.x - 20, t.y - 20, 40, 40);
     }
 
     // Draw apple
-    ctx.save();
-    ctx.translate(apple.x, apple.y);
-    ctx.rotate(apple.rotation);
-    ctx.globalAlpha = 1;
-    ctx.drawImage(appleImg, -20, -20, 40, 40);
-    ctx.restore();
+    appleCtx.save();
+    appleCtx.translate(apple.x, apple.y);
+    appleCtx.rotate(apple.rotation);
+    appleCtx.globalAlpha = 1;
+    appleCtx.drawImage(appleImg, -20, -20, 40, 40);
+    appleCtx.restore();
 }
 
 function animateBannerApple(timestamp) {
     const dt = timestamp - lastTime;
     lastTime = timestamp;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    appleCtx.clearRect(0, 0, appleCanvas.width, appleCanvas.height);
 
     updateApple(dt);
     drawApple();

@@ -27,74 +27,79 @@ It includes:
             <header>
                 <canvas id="appleCanvas"></canvas>
                 <h1 class="title">How do things fall?</h1>
-                <h2 class="subtitle">A Lesson in freefall with Newton and Apple</h2>
+                <h2 class="subtitle">A Lesson in freefall with Newton and Mr. Apple</h2>
             </header>
         </div>
         <div class="wrapper">
             <div class="main">
                 <!-- Show images and provide instructions -->
-                <h2 class="heading">Meet Newton</h2>
+                <h2 id="heading">Meet Newton</h2>
                 <div class="lesson">
-                    <img src="img/svg/newton_apple_hi.svg" />
-                    <div>
-                        <br />
-                        <h3>
-                            Hi there! I'm Sir Isaac Newton <i>(but my friends just call me Newton)</i> and this is my
-                            friend Mr. Apple. We're here to help you understand something amazing: how things fall!
-                        </h3>
-                        <br />
-                    </div>
+                    <img id="isaacNewton" src="img/svg/newton_apple_hi.svg" />
+                    <h3 id="intro">
+                        Hi there! I'm Sir Isaac Newton <i>(but my friends just call me Newton)</i> and this is my friend
+                        Mr. Apple. We're here to help you understand something amazing: how things fall!
+                    </h3>
+                    <br />
                 </div>
-                <p>Drag the ball up or down to set the height, then press play to simulate.</p>
+                <button id="nextBtn" onClick="nextSlide()">Next &rarr;</button>
+                <p id="instruction">Hit Next to learn more!</p>
                 <br />
+                <div id="dropItemSelect">
+                    <button><img src="img/svg/feather.svg"></button>
+                    <button><img src="img/svg/rock.svg"></button>
+                    <button><img src="img/svg/bowlingball.svg"></button>
+                </div>
+                <div id="simulation">
+                    <form>
+                        <!-- Set Unit, default to metric -->
+                        <label>Unit:</label>
+                        <label><input type="radio" id="unitM" name="unit" value="metric" checked />Metric</label>
+                        <label><input type="radio" id="unitFt" name="unit" value="imperial" />Imperial</label><br />
+                        <!-- Display current height -->
+                        <label for="height">Height:</label>
+                        <!-- input for height (updated by dragging the ball or input) -->
+                        <input type="number" id="height" name="height" value="15" step="0.1" min="0" />
+                        <span id="heightLabel">m</span>
+                        <br />
 
-                <form>
-                    <!-- Set Unit, default to metric -->
-                    <label>Unit:</label>
-                    <label><input type="radio" id="unitM" name="unit" value="metric" checked />Metric</label>
-                    <label><input type="radio" id="unitFt" name="unit" value="imperial" />Imperial</label><br />
-                    <!-- Display current height -->
-                    <label for="height">Height:</label>
-                    <!-- input for height (updated by dragging the ball or input) -->
-                    <input type="number" id="height" name="height" value="15" step="0.1" min="0" />
-                    <span id="heightLabel">m</span>
+                        <label for="gravityType">Gravity:</label>
+                        <!-- Dropdown for selecting gravity preset or enabling custom input -->
+                        <select id="gravityType" onchange="setGravity()">
+                            <option value="9.8">Earth (9.8 m/s²)</option>
+                            <option value="1.62">Moon (1.62 m/s²)</option>
+                            <option value="3.71">Mars (3.71 m/s²)</option>
+                            <option value="0">Vacuum (0 m/s²)</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                        <!-- Custom gravity input (starts disabled enabled only when "Custom" is selected) -->
+                        <input type="number" id="gravity" name="gravity" value="9.8" step="0.01" min="0" disabled />
+                        <span id="gravityLabel">m/s<sup>2</sup></span>
+                        <br />
+
+                        <label for="atmosphere">Atmosphere:</label>
+                        <!-- Dropdown for selecting atmosphere type -->
+                        <select id="atmosphere">
+                            <option value="vacuum">Vacuum</option>
+                            <option value="air">Air</option>
+                        </select>
+                        <br />
+                        <!-- Checkbox to enable/disable impact sound -->
+                        <label><input type="checkbox" id="soundToggle" /> Play Sound on Impact</label>
+                    </form>
                     <br />
-
-                    <label for="gravityType">Gravity:</label>
-                    <!-- Dropdown for selecting gravity preset or enabling custom input -->
-                    <select id="gravityType" onchange="setGravity()">
-                        <option value="9.8">Earth (9.8 m/s²)</option>
-                        <option value="1.62">Moon (1.62 m/s²)</option>
-                        <option value="3.71">Mars (3.71 m/s²)</option>
-                        <option value="0">Vacuum (0 m/s²)</option>
-                        <option value="custom">Custom</option>
-                    </select>
-                    <!-- Custom gravity input (starts disabled enabled only when "Custom" is selected) -->
-                    <input type="number" id="gravity" name="gravity" value="9.8" step="0.01" min="0" disabled />
-                    <span id="gravityLabel">m/s<sup>2</sup></span>
-                    <br />
-
-                    <label for="atmosphere">Atmosphere:</label>
-                    <!-- Dropdown for selecting atmosphere type -->
-                    <select id="atmosphere">
-                        <option value="vacuum">Vacuum</option>
-                        <option value="air">Air</option>
-                    </select>
-                    <br />
-                    <!-- Checkbox to enable/disable impact sound -->
-                    <label><input type="checkbox" id="soundToggle" /> Play Sound on Impact</label>
-                </form>
-                <br />
-                <button onclick="startSimulation()">Play</button>
-                <button onclick="pauseSimulation()" id="pauseBtn" disabled>Pause</button>
-                <button onclick="restartSimulation()">Restart</button>
-
-                <!-- Dual canvas system: main canvas + overlay canvas -->
-                <div class="overlayCanvases">
-                    <!-- Main canvas for rendering falling ball animation -->
-                    <canvas id="simulationCanvas" class="canvas-base"></canvas>
-                    <!-- Overlay canvas for drawing simulation metrics (velocity, time, etc.) -->
-                    <canvas id="overlayCanvas" class="canvas-base"></canvas>
+                    <div id="simulationButtons">
+                        <button onclick="startSimulation()">Play</button>
+                        <button onclick="pauseSimulation()" id="pauseBtn" disabled>Pause</button>
+                        <button onclick="restartSimulation()">Restart</button>
+                    </div>
+                    <!-- Dual canvas system: main canvas + overlay canvas -->
+                    <div class="overlayCanvases">
+                        <!-- Main canvas for rendering falling ball animation -->
+                        <canvas id="simulationCanvas" class="canvas-base"></canvas>
+                        <!-- Overlay canvas for drawing simulation metrics (velocity, time, etc.) -->
+                        <canvas id="overlayCanvas" class="canvas-base"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
