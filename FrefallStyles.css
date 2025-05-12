@@ -11,6 +11,10 @@ header {
     background: #777bfd;
     display: inline-flexbox;
     padding: 50px;
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    height: auto;
 }
 
 body {
@@ -109,3 +113,11 @@ button {
 #overlayCanvas {
     pointer-events: none;
 }
+
+#appleCanvas {
+    position: relative;
+    width: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+

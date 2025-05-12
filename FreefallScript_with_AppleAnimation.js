@@ -42,8 +42,7 @@ let heightInput,
     forceDisplay,
     pauseBtn,
     heightLabel,
-    gravityLabel,
-    header;
+    gravityLabel;
 
 /* ============================
    PAGE LOAD
@@ -73,7 +72,6 @@ window.onload = () => {
     gravityLabel = document.getElementById("heightLabel");
     heightLabel = document.getElementById("gravityLabel");
     unitSelect = document.getElementById("unit");
-    header = document.querySelector('header');
 
     // Setup Canvas
     drawBall(ballY);
@@ -349,7 +347,7 @@ const canvas = document.getElementById('appleCanvas');
 const ctx = canvas.getContext('2d');
 
 let appleImg = new Image();
-appleImg.src = "img/svg/apple_1.svg";
+appleImg.src = 'apple_1.svg';
 
 let apple = null;
 let lastTime = 0;
@@ -358,7 +356,6 @@ function resizeCanvas() {
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
 }
-
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
