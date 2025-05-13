@@ -3,6 +3,7 @@
    ============================================================================================== */
 // Script
 let headings = [
+    "Meet Newton",
     "What Goes Up...",
     "A Quick Game",
     "Try It Yourself",
@@ -12,7 +13,7 @@ let headings = [
     "You Discovered the Science of Falling"
 ];
 const scripts = [
-    "Hi there! I'm Sir Isaac Newton 🧑‍🏫, and this is my friend Apple 🍎. We're here to help you understand something amazing: why things fall!",
+    "Hi there! I'm Sir Isaac Newton <i>(but my friends just call me Newton)</i> and this is my friend Mr. Apple. We're here to help you understand something amazing: how things fall!",
     "When we drop something, we know it falls to the ground. But have you ever stopped to wonder *why*? Maybe you've heard the word \"gravity.\" Let's learn a little more about how that works.",
     "Let's try something. I'm going to drop my friend Mr. Apple and you choose one of the items below to drop. Try to choose something that will fall faster than Mr. Apple.",
     "Use the simulation below. You can: • Drag Apple to change the starting height • Press 'Start' to see how it falls. What do you notice?",
@@ -22,8 +23,18 @@ const scripts = [
     "Gravity pulls. Air resists. Buoyancy pushes. You’ve learned why rocks fall, feathers float, and balloons rise. Great job!"
 ];
 
-const instructions = ["Drag the ball up or down to set the height, then press play to simulate.", ""];
+const instructions = [
+    "Drag the ball up or down to set the height, then press play to simulate.",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    ""
+];
 const images = [
+    "img/svg/newton_apple_hi.svg",
     "img/svg/newton_point.svg",
     "img/svg/newton_point.svg",
     "img/svg/newton_point.svg",
@@ -33,6 +44,7 @@ const images = [
 
 let nextBtn,
     header,
+    backBtn,
     introText,
     headingText,
     instructionText,
@@ -43,13 +55,39 @@ let nextBtn,
     densityControls,
     atmosphereControls;
 
+let isSandbox = false;
 /* ==============================================================================================
 
    ============================================================================================== */
 // Initialize ball position
 // On page load: draw the red ball and update the initial height readout.
 document.addEventListener("DOMContentLoaded", () => {
+    pageCount = 0;
+    declareVariables();
+
+    if (nextBtn) {
+        nextBtn.addEventListener("click", () => {
+            nextSlide();
+        });
+    }
+
+    if (sandboxBtn) {
+        sandboxBtn.addEventListener("click", () => {
+            unlockSim();
+        });
+    }
+
+    if (backBtn) {
+        backBtn.addEventListener("click", () => {
+            backSlide();
+        });
+    }
+});
+
+function declareVariables() {
+    sanboxBtn = document.getElementById("sandboxBtn");
     nextBtn = document.getElementById("nextBtn");
+    backBtn = document.getElementById("backBtn");
     introText = document.getElementById("intro");
     headingText = document.getElementById("heading");
     instructionText = document.getElementById("instruction");
@@ -59,29 +97,42 @@ document.addEventListener("DOMContentLoaded", () => {
     gravityLabel = document.getElementById("gravityLabel");
     atmosphereControls = document.getElementById("atmosphereControls");
     densityControls = document.getElementById("densityControls");
-    pageCount = 0;
-
-    if (nextBtn) {
-        nextBtn.addEventListener("click", () => {
-            nextSlide();
-            goToLessonSection(pageCount);
-        });
-    }
-});
+}
 
 // Start simulation; if resume=true, use current velocity/position
 // Starts or resumes the simulation depending on the 'resume' flag.
 function nextSlide() {
-    if (pageCount <= headings.length - 1) {
-        headingText.textContent = headings[pageCount];
-        introText.textContent = scripts[pageCount];
-        instructionText.textContent = instructions[pageCount];
-        isaacNewton.src = images[pageCount];
-        if (pageCount == -1) {
-            nextBtn.disabled = true;
-            dropItemSelect.display = flex;
+    if (pageCount < headings.length) {
+        if (pageCount == headings.length - 1) {
+            nextBtn.style.display = "none";
         }
-        pageCount += 1;
+        headingText.innerHTML = headings[pageCount];
+        introText.innerHTML = scripts[pageCount];
+        //instructionText.innerHTML = instructions[pageCount];
+        instructionText.innerHTML = pageCount;
+        isaacNewton.src = images[pageCount];
+        goToLessonSection();
+        if (pageCount == 0) {
+            backBtn.style.display = "block";
+        }
+    }
+    pageCount += 1;
+}
+
+function backSlide() {
+    pageCount -= 1;
+    if (pageCount >= 0) {
+        headingText.innerHTML = headings[pageCount];
+        introText.innerHTML = scripts[pageCount];
+        //instructionText.innerHTML = instructions[pageCount];
+        instructionText.innerHTML = pageCount;
+        isaacNewton.src = images[pageCount];
+        goToLessonSection();
+        if (pageCount == headings.length - 1) {
+            nextBtn.style.display = "";
+        }
+    } else {
+        backBtn.style.display = "none";
     }
 }
 
@@ -91,13 +142,19 @@ function nextSlide() {
    ============================================================================================== */
 function goToLessonSection() {
     // Hide all optional controls by default
+    simControls.style.display = "none";
+    atmosphereControls.style.display = "none";
     gravityLabel.style.display = "none";
     if (densityControls) densityControls.style.display = "none";
 
     // Unlock controls based on current lesson section
+    if (pageCount == 2) {
+        //nextBtn.disabled = true;
+        dropItemSelect.style.display = "";
+    }
     if (pageCount >= 3) simControls.style.display = "block"; // Try It Yourself and onward
-    if (pageCount >= 5) atmosphereControls.style.display = "block"; // Enable air toggle
-    if (pageCount >= 6 && densityControls) densityControls.style.display = "block"; // Show buoyancy options
+    if (pageCount >= 6) atmosphereControls.style.display = "block"; // Enable air toggle
+    if (pageCount >= 7 && densityControls) densityControls.style.display = "block"; // Show buoyancy options
 }
 
 /* ==============================================================================================
@@ -111,4 +168,27 @@ function attachEquationTooltips() {
         "Acceleration: v = v₀ + at\n" +
         "Air Resistance: F_drag = 0.5 * C_d * ρ * A * v²\n" +
         "Buoyancy: F_buoyancy = ρ_fluid * g * V";
+}
+
+function unlockSim() {
+    isSandbox = !isSandbox;
+    if (isSandbox) {
+        headingText.innerHTML = "Sandbox";
+        introText.innerHTML = "";
+        instructionText.innerHTML = "Play with different combinations!";
+        isaacNewton.src = "img/svg/newton_chalkboard.svg";
+        simControls.style.display = "block";
+        atmosphereControls.style.display = "block";
+        sanboxBtn.textContent = "Go Back";
+        nextBtn.style.display = "none";
+    } else {
+        headingText.innerHTML = headings[pageCount];
+        introText.innerHTML = scripts[pageCount];
+        instructionText.innerHTML = instructions[pageCount];
+        isaacNewton.src = images[pageCount];
+        sanboxBtn.textContent = "Sandbox";
+        simControls.style.display = "none";
+        atmosphereControls.style.display = "none";
+        nextBtn.style.display = "";
+    }
 }

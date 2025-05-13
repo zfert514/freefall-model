@@ -154,3 +154,11 @@ button {
 #atmosphereControls {
     display: none;
 }
+
+#backBtn {
+    display: none;
+}
+
+#mainBtns {
+    display: flexbox;
+}
