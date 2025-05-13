@@ -162,3 +162,7 @@ button {
 #mainBtns {
     display: flexbox;
 }
+
+#sandboxBtn {
+    background: #ffff;
+}

@@ -3,6 +3,7 @@
    ============================================================================================== */
 // Script
 let headings = [
+    "",
     "Meet Newton",
     "What Goes Up...",
     "A Quick Game",
@@ -13,6 +14,7 @@ let headings = [
     "You Discovered the Science of Falling"
 ];
 const scripts = [
+    "",
     "Hi there! I'm Sir Isaac Newton <i>(but my friends just call me Newton)</i> and this is my friend Mr. Apple. We're here to help you understand something amazing: how things fall!",
     "When we drop something, we know it falls to the ground. But have you ever stopped to wonder *why*? Maybe you've heard the word \"gravity.\" Let's learn a little more about how that works.",
     "Let's try something. I'm going to drop my friend Mr. Apple and you choose one of the items below to drop. Try to choose something that will fall faster than Mr. Apple.",
@@ -24,6 +26,7 @@ const scripts = [
 ];
 
 const instructions = [
+    "Click \"Start Learning\" to begin the lesson or Click sandbox to use the Freefall Simulator",
     "Drag the ball up or down to set the height, then press play to simulate.",
     "",
     "",
@@ -34,6 +37,7 @@ const instructions = [
     ""
 ];
 const images = [
+    "img/svg/newton_chalkboard.svg",
     "img/svg/newton_apple_hi.svg",
     "img/svg/newton_point.svg",
     "img/svg/newton_point.svg",
@@ -50,21 +54,24 @@ let nextBtn,
     instructionText,
     dropItemSelect,
     isaacNewton,
-    pageCount,
     simControls,
     densityControls,
     atmosphereControls;
 
 let isSandbox = false;
+let pageCount = 0;
+const dropSection = 3;
 /* ==============================================================================================
 
    ============================================================================================== */
 // Initialize ball position
 // On page load: draw the red ball and update the initial height readout.
 document.addEventListener("DOMContentLoaded", () => {
-    pageCount = 0;
     declareVariables();
-
+    headingText.innerHTML = headings[pageCount];
+    introText.innerHTML = scripts[pageCount];
+    instructionText.innerHTML = instructions[pageCount];
+    isaacNewton.src = images[pageCount];
     if (nextBtn) {
         nextBtn.addEventListener("click", () => {
             nextSlide();
@@ -102,63 +109,47 @@ function declareVariables() {
 // Start simulation; if resume=true, use current velocity/position
 // Starts or resumes the simulation depending on the 'resume' flag.
 function nextSlide() {
-    if (pageCount < headings.length) {
-        if (pageCount == headings.length - 1) {
-            nextBtn.style.display = "none";
-        }
-        headingText.innerHTML = headings[pageCount];
-        introText.innerHTML = scripts[pageCount];
-        //instructionText.innerHTML = instructions[pageCount];
-        instructionText.innerHTML = pageCount;
-        isaacNewton.src = images[pageCount];
-        goToLessonSection();
-        if (pageCount == 0) {
-            backBtn.style.display = "block";
-        }
-    }
     pageCount += 1;
+    goToLessonSection();
 }
-
 function backSlide() {
     pageCount -= 1;
-    if (pageCount >= 0) {
-        headingText.innerHTML = headings[pageCount];
-        introText.innerHTML = scripts[pageCount];
-        //instructionText.innerHTML = instructions[pageCount];
-        instructionText.innerHTML = pageCount;
-        isaacNewton.src = images[pageCount];
-        goToLessonSection();
-        if (pageCount == headings.length - 1) {
-            nextBtn.style.display = "";
-        }
-    } else {
-        backBtn.style.display = "none";
-    }
+    goToLessonSection();
 }
 
 /* ==============================================================================================
-   FUNCTION: goToLessonSection
+
    Controls UI visibility and feature access depending on which lesson section is active
    ============================================================================================== */
 function goToLessonSection() {
     // Hide all optional controls by default
+    headingText.innerHTML = headings[pageCount];
+    introText.innerHTML = scripts[pageCount];
+    instructionText.innerHTML = instructions[pageCount];
+    isaacNewton.src = images[pageCount];
+
+    backBtn.style.display = pageCount > 0 ? "inline-block" : "none";
+    nextBtn.style.display = pageCount < headings.length - 1 ? "inline-block" : "none";
+    nextBtn.innerHTML = pageCount > 0 ? "Next &rarr;" : "Start Learning!";
+    sanboxBtn.style.display = pageCount == 0  ? "inline-block" : "none";
+
     simControls.style.display = "none";
     atmosphereControls.style.display = "none";
     gravityLabel.style.display = "none";
     if (densityControls) densityControls.style.display = "none";
 
     // Unlock controls based on current lesson section
-    if (pageCount == 2) {
+    if (pageCount == dropSection) {
         //nextBtn.disabled = true;
         dropItemSelect.style.display = "";
     }
-    if (pageCount >= 3) simControls.style.display = "block"; // Try It Yourself and onward
-    if (pageCount >= 6) atmosphereControls.style.display = "block"; // Enable air toggle
-    if (pageCount >= 7 && densityControls) densityControls.style.display = "block"; // Show buoyancy options
+    if (pageCount >= 4) simControls.style.display = "block"; // Try It Yourself and onward
+    if (pageCount >= 7) atmosphereControls.style.display = "block"; // Enable air toggle
+    if (pageCount >= 8 && densityControls) densityControls.style.display = "block"; // Show buoyancy options
 }
 
 /* ==============================================================================================
-   FUNCTION: attachEquationTooltips
+
    Adds physics equations as tooltips on the overlay canvas (gravity, drag, buoyancy)
    ============================================================================================== */
 function attachEquationTooltips() {
