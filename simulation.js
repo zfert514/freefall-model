@@ -50,7 +50,7 @@ window.onload = () => {
     heightInput = document.getElementById("height");
     gravityInput = document.getElementById("gravity");
     gravitySelect = document.getElementById("gravityType");
-    atmosphereSelect = document.getElementById("atmosphere");
+    atmosphereSelect = document.getElementById("atmosphereSelect");
     elapsedTimeDisplay = document.getElementById("elapsedTime");
     velocityDisplay = document.getElementById("velocity");
     forceDisplay = document.getElementById("force");
