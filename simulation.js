@@ -1,26 +1,6 @@
-/*
-Freefall Simulation with Canvas UI and Drag-to-Set Height
----------------------------------------------------------
-This script creates a two-canvas interactive simulation:
-- simulationCanvas: handles falling ball physics and animation.
-- overlayCanvas: displays velocity, elapsed time, and forces.
-- Users can drag the ball vertically before starting to simulate to set height.
-- Height is capped at 100ft
-*/
-
 /* ==============================================================================================
    GLOBAL VARIABLES & SETTINGS
    ============================================================================================== */
-// Script
-const headings = ["What Goes Up...", "A Quick Game"];
-const scripts = [
-    "When we drop something, we know it falls to the ground. But have you ever stopped to wonder why? Maybe you've heard of \"gravity\", the force that keeps us on the ground. Let's learn a little more about how that works.",
-    "Let's try something. I'm going to drop my friend Mr. Apple and you choose one of the items below to drop. Try to choose something that will fall faster than Mr. Apple."
-];
-const instructions = ["Drag the ball up or down to set the height, then press play to simulate.", ""];
-const images = ["img/svg/newton_point.svg", "img/svg/newton_point.svg", "img/svg/newton_point.svg", "img/svg/newton_point.svg", "img/svg/newton_point.svg"];
-let pageCount = 0;
-
 // Main interval ID for the simulation animation loop
 let intervalId = null;
 let startTime = null;
@@ -42,7 +22,7 @@ let gravity = 9.8;
 let drag = 0;
 
 // Declare DOM elements globally
-let simCanvas, overlayCanvas, appleCanvas, simCtx, overlayCtx, appleCtx;
+let simCanvas, overlayCanvas, simCtx, overlayCtx;
 let heightInput,
     gravityInput,
     gravitySelect,
@@ -51,26 +31,14 @@ let heightInput,
     velocityDisplay,
     forceDisplay,
     pauseBtn,
-    nextBtn,
     heightLabel,
-    gravityLabel,
-    header,
-    introText,
-    headingText,
-    instructionText,
-    isaacNewton;
+    gravityLabel;
 
-/* ==============================================================================================
-   PAGE LOAD
-   ============================================================================================== */
-// Initialize ball position
-// On page load: draw the red ball and update the initial height readout.
+
 window.onload = () => {
     // Get canvas and canvas set context
     simCanvas = document.getElementById("simulationCanvas");
     overlayCanvas = document.getElementById("overlayCanvas");
-    appleCanvas = document.getElementById("appleCanvas");
-    appleCtx = appleCanvas.getContext("2d");
     simCtx = simCanvas.getContext("2d");
     overlayCtx = overlayCanvas.getContext("2d");
 
@@ -90,12 +58,6 @@ window.onload = () => {
     gravityLabel = document.getElementById("heightLabel");
     heightLabel = document.getElementById("gravityLabel");
     unitSelect = document.getElementById("unit");
-    headingText = document.getElementById("heading");
-    introText = document.getElementById("intro");
-    instructionText = document.getElementById("instruction");
-    nextBtn = document.getElementById("nextBtn");
-    isaacNewton = document.getElementById("isaacNewton");
-    header = document.querySelector("header");
 
     // Setup Canvas
     drawBall(ballY);
@@ -105,9 +67,110 @@ window.onload = () => {
     drawRuler();
 };
 
+function startSimulation(resume = false) {
+    clearInterval(intervalId);
+    isPaused = false;
+
+    heightInput.disabled = true;
+    gravityInput.disabled = true;
+    gravitySelect.disabled = true;
+    atmosphereSelect.disabled = true;
+
+    const gravity = parseFloat(gravityInput.value);
+    const dragCoefficient = atmosphereSelect.value === "air" ? 0.1 : 0;
+    const pixelsPerMeter = simCanvas.height / maxMeters;
+
+    pauseBtn.disabled = false;
+    pauseBtn.textContent = "Pause";
+
+    if (!resume) {
+        velocity = 0;
+        position = height;
+        elapsed = 0;
+    }
+
+    function setGravity() {
+        if (gravitySelect.value === "custom") {
+            gravityInput.removeAttribute("disabled");
+        } else {
+            gravityInput.value = gravitySelect.value;
+            gravityInput.setAttribute("disabled", "true");
+        }
+    }
+
+    startTime = Date.now() - elapsed * 1000;
+
+    intervalId = setInterval(() => {
+        elapsed = (Date.now() - startTime) / 1000;
+        const dragForce = dragCoefficient * velocity * velocity;
+        const netAccel = gravity - dragForce;
+
+        velocity += netAccel * 0.05;
+        position -= velocity * 0.05;
+
+        // Update animation
+        if (position <= 0) {
+            position = 0;
+            clearInterval(intervalId);
+            playImpactSound();
+            pauseBtn.disabled = true;
+        }
+
+        const y = simCanvas.height - position * pixelsPerMeter;
+        drawBall(Math.min(simCanvas.height - 10, y));
+        drawOverlay(elapsed, velocity, gravity, dragForce, position);
+    }, 50);
+}
+
+// Pause/resume toggle
+// Toggles the simulation between paused and resumed states.
+function pauseSimulation() {
+    if (!isPaused) {
+        clearInterval(intervalId);
+        isPaused = !isPaused;
+        pauseBtn.textContent = "Resume";
+    } else {
+        pauseBtn.textContent = "Pause";
+        isPaused = !isPaused;
+        startSimulation(true);
+    }
+}
+
+// Restart everything, reset ball to center
+function restartSimulation() {
+    clearInterval(intervalId);
+    pauseBtn.disabled = true;
+    pauseBtn.textContent = "Pause";
+
+    heightInput.disabled = false;
+    gravityInput.disabled = false;
+    gravitySelect.disabled = false;
+    atmosphereSelect.disabled = false;
+
+    velocity = 0;
+    position = 0;
+    elapsed = 0;
+    ballY = simCanvas.height / 2;
+
+    drawBall(ballY);
+    updateHeight();
+    overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+    drawOverlay(0, 0, 0, 0, height);
+}
+
 /* ==============================================================================================
    UTILITY FUNCTIONS
    ============================================================================================== */
+// Set gravity value from dropdown or allow custom
+function setGravity() {
+    if (gravitySelect.value === "custom") {
+        gravityInput.removeAttribute("disabled");
+    } else {
+        gravityInput.value = gravitySelect.value;
+        gravityInput.setAttribute("disabled", "true");
+    }
+}
+
 // Change unit between m and ft
 function changeUnit() {
     isMetric = !isMetric;
@@ -252,103 +315,6 @@ function setupListeners() {
 }
 
 /* ==============================================================================================
-   SIMULATION LOGIC
-   ============================================================================================== */
-// Set gravity value from dropdown or allow custom
-function setGravity() {
-    if (gravitySelect.value === "custom") {
-        gravityInput.removeAttribute("disabled");
-    } else {
-        gravityInput.value = gravitySelect.value;
-        gravityInput.setAttribute("disabled", "true");
-    }
-}
-
-// Start simulation; if resume=true, use current velocity/position
-// Starts or resumes the simulation depending on the 'resume' flag.
-function startSimulation(resume = false) {
-    clearInterval(intervalId);
-    isPaused = false;
-
-    heightInput.disabled = true;
-    gravityInput.disabled = true;
-    gravitySelect.disabled = true;
-    atmosphereSelect.disabled = true;
-
-    const gravity = parseFloat(gravityInput.value);
-    const dragCoefficient = atmosphereSelect.value === "air" ? 0.1 : 0;
-    const pixelsPerMeter = simCanvas.height / maxMeters;
-
-    pauseBtn.disabled = false;
-    pauseBtn.textContent = "Pause";
-
-    if (!resume) {
-        velocity = 0;
-        position = height;
-        elapsed = 0;
-    }
-
-    startTime = Date.now() - elapsed * 1000;
-
-    intervalId = setInterval(() => {
-        elapsed = (Date.now() - startTime) / 1000;
-        const dragForce = dragCoefficient * velocity * velocity;
-        const netAccel = gravity - dragForce;
-
-        velocity += netAccel * 0.05;
-        position -= velocity * 0.05;
-
-        // Update animation
-        if (position <= 0) {
-            position = 0;
-            clearInterval(intervalId);
-            playImpactSound();
-            pauseBtn.disabled = true;
-        }
-
-        const y = simCanvas.height - position * pixelsPerMeter;
-        drawBall(Math.min(simCanvas.height - 10, y));
-        drawOverlay(elapsed, velocity, gravity, dragForce, position);
-    }, 50);
-}
-
-// Pause/resume toggle
-// Toggles the simulation between paused and resumed states.
-function pauseSimulation() {
-    if (!isPaused) {
-        clearInterval(intervalId);
-        isPaused = !isPaused;
-        pauseBtn.textContent = "Resume";
-    } else {
-        pauseBtn.textContent = "Pause";
-        isPaused = !isPaused;
-        startSimulation(true);
-    }
-}
-
-// Restart everything, reset ball to center
-function restartSimulation() {
-    clearInterval(intervalId);
-    pauseBtn.disabled = true;
-    pauseBtn.textContent = "Pause";
-
-    heightInput.disabled = false;
-    gravityInput.disabled = false;
-    gravitySelect.disabled = false;
-    atmosphereSelect.disabled = false;
-
-    velocity = 0;
-    position = 0;
-    elapsed = 0;
-    ballY = simCanvas.height / 2;
-
-    drawBall(ballY);
-    updateHeight();
-    overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
-    drawOverlay(0, 0, 0, 0, height);
-}
-
-/* ==============================================================================================
    EXTRA CONTROLS
    ============================================================================================== */
 // Play sound if toggle is enabled
@@ -357,110 +323,3 @@ function playImpactSound() {
     const audio = new Audio("https://www.soundjay.com/mechanical/sounds/metal-impact-1.mp3");
     audio.play();
 }
-
-// Go to Next Section
-function nextSlide() {
-    if (pageCount <= headings.length - 1) {
-        headingText.textContent = headings[pageCount];
-        introText.textContent = scripts[pageCount];
-        instructionText.textContent = instructions[pageCount];
-        isaacNewton.src = images[pageCount];
-        if (pageCount == 1) {
-            nextBtn.disabled = true;
-        }
-        pageCount += 1;
-    }
-}
-
-/* ==============================================================================================
-   FALLING APPLE ANIMATION
-   ============================================================================================== */
-appleCanvas = document.getElementById("appleCanvas");
-
-let appleImg = new Image();
-appleImg.src = "img/svg/apple_1.svg";
-
-let apple = null;
-let lastTime = 0;
-
-function resizeCanvas() {
-    appleCanvas.width = appleCanvas.offsetWidth;
-    appleCanvas.height = appleCanvas.offsetHeight;
-}
-
-window.addEventListener("resize", resizeCanvas);
-resizeCanvas();
-
-function spawnApple() {
-    const x = Math.random() * appleCanvas.width;
-    apple = {
-        x,
-        y: -50,
-        vx: 0,
-        vy: 0,
-        rotation: 0,
-        bounced: false,
-        trail: []
-    };
-}
-
-function updateApple(dt) {
-    if (!apple) return;
-
-    // Apply gravity
-    apple.vy += 0.002 * dt;
-    apple.y += apple.vy * dt;
-    apple.rotation += 0.002 * dt;
-
-    // Store trail
-    apple.trail.push({ x: apple.x, y: apple.y, opacity: 1.0 });
-    if (apple.trail.length > 10) apple.trail.shift();
-    apple.trail.forEach((dot, i) => {
-        dot.opacity = 1 - i / apple.trail.length;
-    });
-
-    // Bounce
-    const ground = appleCanvas.height - 40;
-    if (apple.y >= ground && !apple.bounced) {
-        apple.vy = -0.4 * Math.sqrt(apple.vy);
-        apple.bounced = true;
-    } else if (apple.y > appleCanvas.height + 50) {
-        apple = null;
-        setTimeout(spawnApple, 1000);
-    }
-}
-
-function drawApple() {
-    if (!apple) return;
-
-    // Draw trail
-    for (let t of apple.trail) {
-        appleCtx.globalAlpha = t.opacity * 0.5;
-        appleCtx.drawImage(appleImg, t.x - 20, t.y - 20, 40, 40);
-    }
-
-    // Draw apple
-    appleCtx.save();
-    appleCtx.translate(apple.x, apple.y);
-    appleCtx.rotate(apple.rotation);
-    appleCtx.globalAlpha = 1;
-    appleCtx.drawImage(appleImg, -20, -20, 40, 40);
-    appleCtx.restore();
-}
-
-function animateBannerApple(timestamp) {
-    const dt = timestamp - lastTime;
-    lastTime = timestamp;
-
-    appleCtx.clearRect(0, 0, appleCanvas.width, appleCanvas.height);
-
-    updateApple(dt);
-    drawApple();
-
-    requestAnimationFrame(animateBannerApple);
-}
-
-appleImg.onload = () => {
-    spawnApple();
-    requestAnimationFrame(animateBannerApple);
-};
