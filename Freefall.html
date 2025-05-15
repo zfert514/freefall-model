@@ -36,7 +36,7 @@ It includes:
         </div>
         <!-- Main body that contains lesson and simulator -->
         <div id="wrapper">
-            <div class="main">
+            <div id="main">
                 <!-- Lesson area with pictures and navigation controls -->
                 <div id="lessonNav">
                     <h2 id="heading"></h2>
@@ -107,7 +107,7 @@ It includes:
                         <button onclick="restartSimulation()">Restart</button>
                     </div>
                     <!-- Dual canvas system: main canvas + overlay canvas -->
-                    <div class="overlayCanvases">
+                    <div id="canvases">
                         <!-- Main canvas for rendering falling ball animation -->
                         <canvas id="simulationCanvas" class="canvas-base"></canvas>
                         <!-- Overlay canvas for drawing simulation metrics (velocity, time, etc.) -->

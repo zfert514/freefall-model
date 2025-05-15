@@ -53,7 +53,7 @@ function spawnApple() {
     apple = {
         x, // horizontal position
         y: -50, // start above the top of the canvas
-        vx: 0, // horizontal velocity (not used here)
+        vx: 0, // horizontal velocity
         vy: 0, // vertical velocity
         rotation: 0, // rotation angle
         bounced: false, // track whether it has bounced
@@ -88,14 +88,14 @@ function updateApple(dt) {
     apple.rotation += 0.002 * dt;
 
     // Save current position for trail
-    apple.trail.push({ x: apple.x, y: apple.y, opacity: 1.0 });
+    apple.trail.push({ x: apple.x, y: apple.y, opacity: 1, rotation: apple.rotation });
 
     // Limit trail to 10 entries
     if (apple.trail.length > 10) apple.trail.shift();
 
     // Fade out trail from newest to oldest
     apple.trail.forEach((dot, i) => {
-        dot.opacity = 1 - i / apple.trail.length;
+        dot.opacity = 0.7 - i / apple.trail.length;
     });
 
     // Set bounce threshold near bottom of canvas
@@ -103,8 +103,8 @@ function updateApple(dt) {
 
     // If apple reaches ground and hasn't bounced yet, bounce it
     if (apple.y >= ground && !apple.bounced) {
-        // Reverse and dampen vertical velocity
-        apple.vy = -0.4 * Math.sqrt(apple.vy);
+        apple.vy = -0.4 * Math.sqrt(apple.vy); // Reverse and dampen vertical velocity
+        apple.vx = (Math.random() - 0.5) * 2;  // Add small random left/right push
         apple.bounced = true;
     }
     // If apple has gone off screen, remove it and spawn another after a delay

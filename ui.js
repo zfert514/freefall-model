@@ -35,7 +35,7 @@ const scripts = [
 ];
 
 const instructions = [
-    'Click "Start Learning" to begin the lesson or Click sandbox to use the Freefall Simulator',
+    'Choose <b>Start Learning</b> to begin the lesson or <b>Sandbox</b> to use the Freefall Simulator',
     "Drag the ball up or down to set the height, then press play to simulate.",
     "",
     "",
@@ -70,7 +70,8 @@ let nextBtn,
     isaacNewton,
     simControls,
     densityControls,
-    atmosphereControls;
+    atmosphereControls,
+    simulation;
 
 /* ==============================================================================================
     INITIALIZE VALUES FROM DOM
@@ -113,6 +114,7 @@ function declareVariables() {
     gravityLabel = document.getElementById("gravityLabel");
     atmosphereControls = document.getElementById("atmosphereControls");
     densityControls = document.getElementById("densityControls");
+    simulation = document.getElementById("simulation");
 
     // Set Lesson text and images
     headingText.innerHTML = headings[pageCount];
@@ -171,11 +173,12 @@ function unlockSim() {
         headingText.innerHTML = "Sandbox";
         introText.innerHTML = "";
         instructionText.innerHTML = "Play with different combinations!";
-        isaacNewton.src = "img/svg/newton_chalkboard.svg";
+        isaacNewton.src = "img/svg/newton_desk.svg";
         simControls.style.display = "block";
         atmosphereControls.style.display = "block";
         sanboxBtn.textContent = "Go Back";
         nextBtn.style.display = "none";
+        simulation.style.display = "block";
     } else {
         headingText.innerHTML = headings[pageCount];
         introText.innerHTML = scripts[pageCount];
@@ -185,6 +188,7 @@ function unlockSim() {
         simControls.style.display = "none";
         atmosphereControls.style.display = "none";
         nextBtn.style.display = "";
+        simulation.style.display = "none";
     }
 }
 
