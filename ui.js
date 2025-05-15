@@ -1,7 +1,16 @@
+/*
+This is the UI Control document for the Freefall Simulation.
+It includes:
+- Functionality for changing images
+- Functionality for moving through the lesson
+- Functionality for lesson navigation buttons
+- Functionality hiding and showing the simulation
+- (NEEDS WORK) Functionality for tooltips with equations
+*/
+
 /* ==============================================================================================
    GLOBAL VARIABLES & SETTINGS
    ============================================================================================== */
-// Script
 let headings = [
     "",
     "Meet Newton",
@@ -26,7 +35,7 @@ const scripts = [
 ];
 
 const instructions = [
-    "Click \"Start Learning\" to begin the lesson or Click sandbox to use the Freefall Simulator",
+    'Click "Start Learning" to begin the lesson or Click sandbox to use the Freefall Simulator',
     "Drag the ball up or down to set the height, then press play to simulate.",
     "",
     "",
@@ -46,6 +55,11 @@ const images = [
     "img/svg/newton_point.svg"
 ];
 
+let isSandbox = false; // Flag for sandbox
+let pageCount = 0; // Keep track of lesson pages
+const dropSection = 3; // Page when dropSelection is needed
+
+// Declare DOM elements globally
 let nextBtn,
     header,
     backBtn,
@@ -58,20 +72,12 @@ let nextBtn,
     densityControls,
     atmosphereControls;
 
-let isSandbox = false;
-let pageCount = 0;
-const dropSection = 3;
 /* ==============================================================================================
-
+    INITIALIZE VALUES FROM DOM
    ============================================================================================== */
-// Initialize ball position
-// On page load: draw the red ball and update the initial height readout.
+// Sets up listeners for lesson buttons when DOM loads
 document.addEventListener("DOMContentLoaded", () => {
     declareVariables();
-    headingText.innerHTML = headings[pageCount];
-    introText.innerHTML = scripts[pageCount];
-    instructionText.innerHTML = instructions[pageCount];
-    isaacNewton.src = images[pageCount];
     if (nextBtn) {
         nextBtn.addEventListener("click", () => {
             nextSlide();
@@ -89,9 +95,12 @@ document.addEventListener("DOMContentLoaded", () => {
             backSlide();
         });
     }
+    goToLessonSection();
 });
 
+// Grabs information from HTML
 function declareVariables() {
+    // Get UI elements
     sanboxBtn = document.getElementById("sandboxBtn");
     nextBtn = document.getElementById("nextBtn");
     backBtn = document.getElementById("backBtn");
@@ -104,23 +113,30 @@ function declareVariables() {
     gravityLabel = document.getElementById("gravityLabel");
     atmosphereControls = document.getElementById("atmosphereControls");
     densityControls = document.getElementById("densityControls");
+
+    // Set Lesson text and images
+    headingText.innerHTML = headings[pageCount];
+    introText.innerHTML = scripts[pageCount];
+    instructionText.innerHTML = instructions[pageCount];
+    isaacNewton.src = images[pageCount];
 }
 
-// Start simulation; if resume=true, use current velocity/position
-// Starts or resumes the simulation depending on the 'resume' flag.
+// Moves to the next lesson section
 function nextSlide() {
     pageCount += 1;
     goToLessonSection();
 }
+
+// Moves to the previous lesson section
 function backSlide() {
     pageCount -= 1;
     goToLessonSection();
 }
 
 /* ==============================================================================================
-
-   Controls UI visibility and feature access depending on which lesson section is active
+    UTILITY FUNCTIONS
    ============================================================================================== */
+// Controls UI visibility and feature access depending on which lesson section is active
 function goToLessonSection() {
     // Hide all optional controls by default
     headingText.innerHTML = headings[pageCount];
@@ -131,7 +147,7 @@ function goToLessonSection() {
     backBtn.style.display = pageCount > 0 ? "inline-block" : "none";
     nextBtn.style.display = pageCount < headings.length - 1 ? "inline-block" : "none";
     nextBtn.innerHTML = pageCount > 0 ? "Next &rarr;" : "Start Learning!";
-    sanboxBtn.style.display = pageCount == 0  ? "inline-block" : "none";
+    sanboxBtn.style.display = pageCount == 0 ? "inline-block" : "none";
 
     simControls.style.display = "none";
     atmosphereControls.style.display = "none";
@@ -148,19 +164,7 @@ function goToLessonSection() {
     if (pageCount >= 8 && densityControls) densityControls.style.display = "block"; // Show buoyancy options
 }
 
-/* ==============================================================================================
-
-   Adds physics equations as tooltips on the overlay canvas (gravity, drag, buoyancy)
-   ============================================================================================== */
-function attachEquationTooltips() {
-    const overlay = document.getElementById("overlayCanvas");
-    overlay.title =
-        "Gravity: F = mg\n" +
-        "Acceleration: v = v₀ + at\n" +
-        "Air Resistance: F_drag = 0.5 * C_d * ρ * A * v²\n" +
-        "Buoyancy: F_buoyancy = ρ_fluid * g * V";
-}
-
+// Hides and unhides the simulation as necessary
 function unlockSim() {
     isSandbox = !isSandbox;
     if (isSandbox) {
@@ -182,4 +186,17 @@ function unlockSim() {
         atmosphereControls.style.display = "none";
         nextBtn.style.display = "";
     }
+}
+
+/* ==============================================================================================
+    EXTRA FUNCTIONS
+   ============================================================================================== */
+// Adds physics equations as tooltips on the overlay canvas (gravity, drag, buoyancy)
+function attachEquationTooltips() {
+    const overlay = document.getElementById("overlayCanvas");
+    overlay.title =
+        "Gravity: F = mg\n" +
+        "Acceleration: v = v₀ + at\n" +
+        "Air Resistance: F_drag = 0.5 * C_d * ρ * A * v²\n" +
+        "Buoyancy: F_buoyancy = ρ_fluid * g * V";
 }

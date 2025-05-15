@@ -1,6 +1,7 @@
 <!--
 This is the main HTML document for the Freefall Simulation.
 It includes:
+- A Lesson or Sandbox mode
 - A form for configuring simulation settings (gravity, atmosphere, etc.)
 - Buttons to start, pause, and restart the simulation
 - A canvas to render the falling object animation
@@ -23,43 +24,45 @@ It includes:
         <script src="appleBanner.js" defer></script>
         <script src="ui.js" defer></script>
         <script src="simulation.js" defer></script>
-        <script>
-            window.onload = function () {
-                attachEquationTooltips();
-                goToLessonSection(0); // Start at the first lesson section
-            };
-        </script>
     </head>
-    <body class="noSelect">
-        <div class="headerWrapper">
+    <body id="noSelect">
+        <!-- Top header that includes falling apple animation -->
+        <div id="headerWrapper">
             <header>
                 <canvas id="appleCanvas"></canvas>
-                <h1 class="title">How do things fall?</h1>
-                <h2 class="subtitle">A Lesson in freefall with Newton and Mr. Apple</h2>
+                <h1 id="title">How do things fall?</h1>
+                <h2 id="subtitle">A Lesson in freefall with Newton and Mr. Apple</h2>
             </header>
         </div>
-        <div class="wrapper">
+        <!-- Main body that contains lesson and simulator -->
+        <div id="wrapper">
             <div class="main">
-                <!-- Show images and provide instructions -->
-                <h2 id="heading"></h2>
-                <div class="lesson">
-                    <img id="isaacNewton" src="img/svg/newton_chalkboard.svg" />
-                    <h3 id="intro"></h3>
-                    <br />
+                <!-- Lesson area with pictures and navigation controls -->
+                <div id="lessonNav">
+                    <h2 id="heading"></h2>
+                    <div id="lessonText">
+                        <img id="isaacNewton" src="img/svg/newton_chalkboard.svg" />
+                        <h3 id="intro"></h3>
+                        <br />
+                    </div>
+                    <!-- Lesson navigation buttons -->
+                    <div id="mainBtns">
+                        <button id="backBtn">&larr; Back</button>
+                        <button id="nextBtn">Start Learning!</button>
+                        <button id="sandboxBtn">Sandbox</button>
+                    </div>
+                    <p id="instruction">Hit Next to learn more!</p>
                 </div>
-                <div id="mainBtns">
-                    <button id="backBtn">&larr; Back</button>
-                    <button id="nextBtn">Start Learning!</button>
-                    <button id="sandboxBtn">Sandbox</button>
-                </div>
-                <p id="instruction">Hit Next to learn more!</p>
                 <br />
+                <!-- Additional drop options used for parts of the lesson -->
                 <div id="dropItemSelect">
                     <button><img src="img/svg/feather.svg" /></button>
                     <button><img src="img/svg/rock.svg" /></button>
                     <button><img src="img/svg/bowlingball.svg" /></button>
                 </div>
+                <!-- Main Simulation area -->
                 <div id="simulation">
+                    <!-- Simulation controls -->
                     <form id="simControls">
                         <!-- Set Unit, default to metric -->
                         <label>Unit:</label>
@@ -71,7 +74,6 @@ It includes:
                         <input type="number" id="height" name="height" value="15" step="0.1" min="0" />
                         <span id="heightLabel">m</span>
                         <br />
-
                         <label for="gravityType">Gravity:</label>
                         <!-- Dropdown for selecting gravity preset or enabling custom input -->
                         <select id="gravityType" onchange="setGravity()">
@@ -85,9 +87,9 @@ It includes:
                         <input type="number" id="gravity" name="gravity" value="9.8" step="0.01" min="0" disabled />
                         <span id="gravityLabel">m/s<sup>2</sup></span>
                         <br />
+                        <!-- Dropdown for selecting atmosphere type -->
                         <div id="atmosphereControls">
                             <label for="atmosphereSelect">Atmosphere:</label>
-                            <!-- Dropdown for selecting atmosphere type -->
                             <select id="atmosphereSelect">
                                 <option value="vacuum">Vacuum</option>
                                 <option value="air">Air</option>
@@ -98,6 +100,7 @@ It includes:
                         <label><input type="checkbox" id="soundToggle" /> Play Sound on Impact</label>
                     </form>
                     <br />
+                    <!-- Simulation control buttons -->
                     <div id="simulationButtons">
                         <button onclick="startSimulation()">Play</button>
                         <button onclick="pauseSimulation()" id="pauseBtn" disabled>Pause</button>

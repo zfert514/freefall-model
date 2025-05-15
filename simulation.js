@@ -1,3 +1,16 @@
+/*
+This is the Simulation Control document for the Freefall Simulation.
+It includes:
+- Functionality for configuring simulation settings (gravity, atmosphere, etc.)
+- Functionality for start, pause, and restart the simulation
+- Functionality for canvas to render the falling object animation
+- Functionality for overlay canvas for overlaying live data like velocity and force
+- (NEEDS WORK) Functionality for drag in air environment
+- Fuctionality for changing unit from m to ft
+- Functionality for dragging the red ball up and down to set initial height
+- Maximum height set to 100ft (~30.48 meters)
+*/
+
 /* ==============================================================================================
    GLOBAL VARIABLES & SETTINGS
    ============================================================================================== */
@@ -5,16 +18,20 @@
 let intervalId = null;
 let startTime = null;
 let isPaused = false;
+
 // Flag to track whether the user is currently dragging the red ball
 let isDragging = false;
+
 let ballY = 150; // Initial Y center in canvas
 let height = 15; // Default 15 meters (~50 ft)
 const maxMeters = 30.48; // 100 ft in meters
 let ballSize = 10; // Radius of the ball
 let ruler = 20; // Length of the ruler
-const conversionCoefficient = 3.28084;
-let isMetric = true;
+const conversionCoefficient = 3.28084; // Metric to Imperial function
+let isMetric = true; // Default to metric
+let canvasSize = 300;
 
+// Base values for main functions
 let velocity = 0;
 let position = 0;
 let elapsed = 0;
@@ -34,8 +51,22 @@ let heightInput,
     heightLabel,
     gravityLabel;
 
-
+/* ==============================================================================================
+    INITIALIZE VALUES FROM DOM
+   ============================================================================================== */
 window.onload = () => {
+    initialize();
+
+    // Setup Canvas
+    drawBall(ballY);
+    updateHeight();
+    setupListeners();
+    drawOverlay(0, 0, 0, 0, parseFloat(heightInput.value));
+    drawRuler();
+};
+
+// Grabs information from HTML
+function initialize() {
     // Get canvas and canvas set context
     simCanvas = document.getElementById("simulationCanvas");
     overlayCanvas = document.getElementById("overlayCanvas");
@@ -43,8 +74,8 @@ window.onload = () => {
     overlayCtx = overlayCanvas.getContext("2d");
 
     // Set canvas size
-    simCanvas.width = overlayCanvas.width = 300;
-    simCanvas.height = overlayCanvas.height = 300;
+    simCanvas.width = overlayCanvas.width = canvasSize;
+    simCanvas.height = overlayCanvas.height = canvasSize;
 
     // Get UI elements
     heightInput = document.getElementById("height");
@@ -58,68 +89,82 @@ window.onload = () => {
     gravityLabel = document.getElementById("heightLabel");
     heightLabel = document.getElementById("gravityLabel");
     unitSelect = document.getElementById("unit");
+}
 
-    // Setup Canvas
-    drawBall(ballY);
-    updateHeight();
-    setupListeners();
-    drawOverlay(0, 0, 0, 0, parseFloat(heightInput.value));
-    drawRuler();
-};
-
+/* ==============================================================================================
+    SIMULATION CONTROLS
+   ============================================================================================== */
+// Starts the simulation from set values
 function startSimulation(resume = false) {
+    // Resets the simulation and unpauses if paused
     clearInterval(intervalId);
     isPaused = false;
 
+    // Disables input changes while simultion is running
     heightInput.disabled = true;
     gravityInput.disabled = true;
     gravitySelect.disabled = true;
     atmosphereSelect.disabled = true;
 
-    const gravity = parseFloat(gravityInput.value);
+    // Sets gravity to chosen option
+    gravity = parseFloat(gravityInput.value);
+
+    // 0.1 is the drag coefficient for a smooth sphere
     const dragCoefficient = atmosphereSelect.value === "air" ? 0.1 : 0;
+    // Ratio of canvas and max height values
     const pixelsPerMeter = simCanvas.height / maxMeters;
 
+    // Enable the pause button
     pauseBtn.disabled = false;
     pauseBtn.textContent = "Pause";
 
+    // Set values to base, we don't do this when resuming simulation
     if (!resume) {
         velocity = 0;
         position = height;
         elapsed = 0;
     }
 
-    function setGravity() {
-        if (gravitySelect.value === "custom") {
-            gravityInput.removeAttribute("disabled");
-        } else {
-            gravityInput.value = gravitySelect.value;
-            gravityInput.setAttribute("disabled", "true");
-        }
-    }
-
+    // Set the start time of the simulation by subtracting the previously elapsed time.
+    // This is useful for resuming the simulation without resetting the clock.
     startTime = Date.now() - elapsed * 1000;
 
+    // Set up an interval loop that runs every 50 milliseconds (~20 FPS)
     intervalId = setInterval(() => {
+        // Calculate elapsed time in seconds since startTime
         elapsed = (Date.now() - startTime) / 1000;
+
+        // Calculate the force of air resistance (drag is 0 in vacuum)
+        // Drag is proportional to the square of the velocity f=kv^2
         const dragForce = dragCoefficient * velocity * velocity;
+
+        // Net acceleration is gravity minus drag
         const netAccel = gravity - dragForce;
 
+        // Update velocity using the current net acceleration and a fixed timestep (0.05 seconds)
         velocity += netAccel * 0.05;
+
+        // Update the position (height) by subtracting the amount it fell during this timestep
         position -= velocity * 0.05;
 
-        // Update animation
+        // Stop the simulation when the object hits the ground
         if (position <= 0) {
-            position = 0;
-            clearInterval(intervalId);
-            playImpactSound();
-            pauseBtn.disabled = true;
+            position = 0; // Clamp position to the ground
+            clearInterval(intervalId); // Stop the interval loop
+            playImpactSound(); // Optionally play a sound effect on impact
+            pauseBtn.disabled = true; // Disable the pause button since it's no longer needed
         }
 
+        // Calculate the vertical pixel position on the canvas
+        // The ball is drawn from the bottom up, so subtract from canvas height
         const y = simCanvas.height - position * pixelsPerMeter;
+
+        // Draw the ball at its new vertical position (but clamp it so it doesn't go below canvas)
         drawBall(Math.min(simCanvas.height - 10, y));
+
+        // Draw any overlay graphics, like elapsed time, velocity, gravity, drag, and height
         drawOverlay(elapsed, velocity, gravity, dragForce, position);
-    }, 50);
+    }, 50); // Run every 50 milliseconds
 }
 
 // Pause/resume toggle
@@ -136,7 +181,7 @@ function pauseSimulation() {
     }
 }
 
-// Restart everything, reset ball to center
+// Reset everything, reset ball to center
 function restartSimulation() {
     clearInterval(intervalId);
     pauseBtn.disabled = true;
@@ -188,6 +233,7 @@ function changeUnit() {
     }
 }
 
+// Uses the conversionCoefficient, makes things a little simpler
 function convert(meter) {
     return meter * conversionCoefficient;
 }
@@ -205,6 +251,22 @@ function updateHeight() {
     drawOverlay(elapsed, velocity, gravity, drag, height);
 }
 
+// Moves ball when height input is changed
+function repsoitionBall() {
+    // Get new height value
+    const newHeight = parseFloat(document.getElementById("height").value);
+
+    // Convert to canvas Y position
+    const pixelsPerMeter = simCanvas.height / maxMeters;
+    ballY = simCanvas.height - newHeight * pixelsPerMeter;
+
+    drawBall(ballY); // Update ball position
+    updateHeight(); // Recalculate height from Y if needed
+}
+
+/* ==============================================================================================
+   CANVAS DRAWING
+   ============================================================================================== */
 // Create Height Comparisons starting with human height
 function drawRuler() {
     // Create Ruler
@@ -250,19 +312,6 @@ function drawOverlay(elapsed, velocity, gravity, drag, height) {
         }
         //overlayCtx.fillText(`Gravity: ${gravity.toFixed(2)} m/s²`, 10, 80);
     }
-}
-
-// Moves ball when height input is changed
-function repsoitionBall() {
-    // Get new height value
-    const newHeight = parseFloat(document.getElementById("height").value);
-
-    // Convert to canvas Y position
-    const pixelsPerMeter = simCanvas.height / maxMeters;
-    ballY = simCanvas.height - newHeight * pixelsPerMeter;
-
-    drawBall(ballY); // Update ball position
-    updateHeight(); // Recalculate height from Y if needed
 }
 
 /* ==============================================================================================
