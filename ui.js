@@ -35,15 +35,15 @@ const scripts = [
 ];
 
 const instructions = [
-    'Choose <b>Start Learning</b> to begin the lesson or <b>Sandbox</b> to use the Freefall Simulator',
-    "Drag the ball up or down to set the height, then press play to simulate.",
+    "Choose <b>Start Learning</b> to begin the lesson or <b>Sandbox</b> to use the simulator",
+    "",
+    "",
+    "Choose below and try",
     "",
     "",
     "",
     "",
-    "",
-    "",
-    ""
+    "Drag the ball up or down to set the height, then press play to simulate."
 ];
 const images = [
     "img/svg/newton_chalkboard.svg",
@@ -154,16 +154,12 @@ function goToLessonSection() {
     simControls.style.display = "none";
     atmosphereControls.style.display = "none";
     gravityLabel.style.display = "none";
-    if (densityControls) densityControls.style.display = "none";
+    //if (densityControls) densityControls.style.display = "none";
 
     // Unlock controls based on current lesson section
-    if (pageCount == dropSection) {
-        //nextBtn.disabled = true;
-        dropItemSelect.style.display = "";
-    }
-    if (pageCount >= 4) simControls.style.display = "block"; // Try It Yourself and onward
-    if (pageCount >= 7) atmosphereControls.style.display = "block"; // Enable air toggle
-    if (pageCount >= 8 && densityControls) densityControls.style.display = "block"; // Show buoyancy options
+    dropItemSelect.style.display = simulation.style.display = pageCount >= dropSection ? "block" : "none"; // A Quick Game and onward
+    //if (pageCount >= 7) atmosphereControls.style.display = "block"; // Enable air toggle
+    //if (pageCount >= 8 && densityControls) densityControls.style.display = "block"; // Show buoyancy options
 }
 
 // Hides and unhides the simulation as necessary
