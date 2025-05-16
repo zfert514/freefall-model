@@ -38,6 +38,8 @@ let elapsed = 0;
 let gravity = 9.8;
 let drag = 0;
 
+const appleImage = new Image();
+
 // Declare DOM elements globally
 let simCanvas, overlayCanvas, simCtx, overlayCtx;
 let heightInput,
@@ -48,8 +50,8 @@ let heightInput,
     velocityDisplay,
     forceDisplay,
     pauseBtn,
-    heightLabel,
-    gravityLabel;
+    heightUnit,
+    gravityUnit;
 
 /* ==============================================================================================
     INITIALIZE VALUES FROM DOM
@@ -86,9 +88,11 @@ function initialize() {
     velocityDisplay = document.getElementById("velocity");
     forceDisplay = document.getElementById("force");
     pauseBtn = document.getElementById("pauseBtn");
-    gravityLabel = document.getElementById("heightLabel");
-    heightLabel = document.getElementById("gravityLabel");
+    gravityUnit = document.getElementById("gravityUnit");
+    heightUnit = document.getElementById("heightUnit");
     unitSelect = document.getElementById("unit");
+
+    appleImage.src = "img/svg/apple_thin.svg";
 }
 
 /* ==============================================================================================
@@ -228,8 +232,12 @@ function changeUnit() {
     // Changes height input
     if (isMetric) {
         heightInput.value = height.toFixed(2);
+        heightUnit.innerHTML = "m";
+        gravityUnit.innerHTML = "m/s<sup>2</sup>";
     } else {
         heightInput.value = convert(height).toFixed(2);
+        heightUnit.innerHTML = "ft";
+        gravityUnit.innerHTML = "ft/s<sup>2</sup>";
     }
 }
 
@@ -276,18 +284,19 @@ function drawRuler() {
     simCtx.stroke();
 }
 
-// Draw the red ball at current Y
-// Draws the red ball at a given Y position in the simulation canvas.
+// Draw the ball at current Y
+// Draws the ball at a given Y position in the simulation canvas.
 function drawBall(y) {
     simCtx.clearRect(0, 0, simCanvas.width - ruler, simCanvas.height); // Erases canvas each frame for animation
 
     // Keep y between ballSize and canvas height - ballSize
     y = Math.max(ballSize, Math.min(simCanvas.height - ballSize, y));
 
-    simCtx.beginPath();
-    simCtx.arc(simCanvas.width / 2, y, ballSize, 0, Math.PI * 2); // Creates ball centrally
-    simCtx.fillStyle = "red";
-    simCtx.fill();
+    // Create ball image (apple)
+    const imageSize = ballSize * 2;
+    const x = simCanvas.width / 2 - ballSize;
+    const drawY = y - ballSize;
+    simCtx.drawImage(appleImage, x, drawY, imageSize, imageSize);
 }
 
 // Draw data overlay

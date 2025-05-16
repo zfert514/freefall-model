@@ -22,7 +22,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     // Load the apple image
     appleImg = new Image();
-    appleImg.src = "img/svg/apple_1.svg";
+    appleImg.src = "img/svg/apple_thin.svg";
 
     // Declare apple object and time tracking
     apple = null;

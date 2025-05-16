@@ -49,7 +49,7 @@ const images = [
     "img/svg/newton_chalkboard.svg",
     "img/svg/newton_apple_hi.svg",
     "img/svg/newton_point.svg",
-    "img/svg/newton_point.svg",
+    "img/svg/newton_crossed.svg",
     "img/svg/newton_point.svg",
     "img/svg/newton_point.svg",
     "img/svg/newton_point.svg"
@@ -140,24 +140,23 @@ function backSlide() {
    ============================================================================================== */
 // Controls UI visibility and feature access depending on which lesson section is active
 function goToLessonSection() {
-    // Hide all optional controls by default
+    // Change text and images for that slide
     headingText.innerHTML = headings[pageCount];
     introText.innerHTML = scripts[pageCount];
     instructionText.innerHTML = instructions[pageCount];
     isaacNewton.src = images[pageCount];
 
-    backBtn.style.display = pageCount > 0 ? "inline-block" : "none";
-    nextBtn.style.display = pageCount < headings.length - 1 ? "inline-block" : "none";
-    nextBtn.innerHTML = pageCount > 0 ? "Next &rarr;" : "Start Learning!";
-    sanboxBtn.style.display = pageCount == 0 ? "inline-block" : "none";
-
+    // Hide all optional controls by default
     simControls.style.display = "none";
     atmosphereControls.style.display = "none";
-    gravityLabel.style.display = "none";
     //if (densityControls) densityControls.style.display = "none";
 
     // Unlock controls based on current lesson section
     dropItemSelect.style.display = simulation.style.display = pageCount >= dropSection ? "block" : "none"; // A Quick Game and onward
+    backBtn.style.display = pageCount > 0 ? "inline-block" : "none";
+    nextBtn.style.display = pageCount < headings.length - 1 ? "inline-block" : "none";
+    nextBtn.innerHTML = pageCount > 0 ? "Next &rarr;" : "Start Learning!";
+    sanboxBtn.style.display = pageCount == 0 ? "inline-block" : "none";
     //if (pageCount >= 7) atmosphereControls.style.display = "block"; // Enable air toggle
     //if (pageCount >= 8 && densityControls) densityControls.style.display = "block"; // Show buoyancy options
 }
