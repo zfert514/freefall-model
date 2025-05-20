@@ -24,6 +24,7 @@ It includes:
         <script src="appleBanner.js" defer></script>
         <script src="ui.js" defer></script>
         <script src="simulation.js" defer></script>
+        <script src="game.js" defer></script>
     </head>
     <body id="noSelect">
         <!-- Top header that includes falling apple animation -->
@@ -108,10 +109,11 @@ It includes:
                     </div>
                     <!-- Dual canvas system: main canvas + overlay canvas -->
                     <div id="canvases">
+                        <canvas id="gameCanvas" class="canvasBase"></canvas>
                         <!-- Main canvas for rendering falling ball animation -->
-                        <canvas id="simulationCanvas" class="canvas-base"></canvas>
+                        <canvas id="simulationCanvas" class="canvasBase"></canvas>
                         <!-- Overlay canvas for drawing simulation metrics (velocity, time, etc.) -->
-                        <canvas id="overlayCanvas" class="canvas-base"></canvas>
+                        <canvas id="overlayCanvas" class="canvasBase"></canvas>
                     </div>
                 </div>
             </div>

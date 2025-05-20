@@ -1,20 +1,11 @@
 /* This CSS file applies styling. */
+/* ==============================================================================================
+   TYPE STYLES
+   ============================================================================================== */
 * {
     padding: 0;
     margin: 0;
     text-align: center;
-}
-
-/* Remove blue flash when click happens */
-header {
-    line-height: 0.6;
-    background: #777bfd;
-    display: inline-flexbox;
-    padding: 50px;
-    position: relative;
-    z-index: 1;
-    overflow: hidden;
-    height: auto;
 }
 
 body {
@@ -34,9 +25,44 @@ button {
     background: rgb(20, 176, 255);
 }
 
-#nextBtn {
-    opacity: 100%;
-    width: 200px;
+/* Remove blue flash when click happens */
+header {
+    line-height: 0.6;
+    background: #777bfd;
+    display: inline-flexbox;
+    padding: 50px;
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    height: auto;
+}
+
+/* ==============================================================================================
+   ID STYLES
+   ============================================================================================== */
+#atmosphereControls {
+    display: none;
+}
+
+#backBtn {
+    display: none;
+}
+
+#dropItemSelect {
+    display: none;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+#dropItemSelect img {
+    width: 50px;
+    height: 50px;
+}
+
+#heading {
+    font-size: xx-large;
 }
 
 #lessonText {
@@ -47,28 +73,21 @@ button {
     gap: 20px;
     text-align: left;
 }
+
 #lessonText img {
     flex-shrink: 0;
     width: 150px;
     float: left;
 }
 
-#heading {
-    font-size: xx-large;
-}
-
-#wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-}
-
 #main {
     margin: 0;
     padding: 20px;
     max-width: 600px;
+}
+
+#mainBtns {
+    display: flexbox;
 }
 
 #noSelect {
@@ -79,8 +98,61 @@ button {
     -ms-user-select: none;
     user-select: none;
 }
+
 #noSelect:focus {
     outline: none !important;
+}
+
+#nextBtn {
+    opacity: 100%;
+    width: 200px;
+}
+
+#sandboxBtn {
+    background: #ffff;
+}
+
+#simControls {
+    display: none;
+}
+
+#simulation {
+    display: none;
+}
+
+#subtitle {
+    font-size: 20px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+
+#title {
+    font-size: 50px;
+    margin-bottom: 25px;
+    position: relative;
+    z-index: 1;
+}
+
+#wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+/* ==============================================================================================
+   CANVAS STYLES
+   ============================================================================================== */
+#appleCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0; /* Lower z-index puts it behind other header content */
+    pointer-events: none;
 }
 
 #canvases {
@@ -89,8 +161,15 @@ button {
     margin: auto auto;
 }
 
+#overlayCanvas {
+    pointer-events: none;
+}
+
+/* ==============================================================================================
+   CLASS STYLES
+   ============================================================================================== */
 /* Sets the base style for a canvas with border */
-.canvas-base {
+.canvasBase {
     border: 1px solid #000000;
     display: block;
     margin: 0 auto; /* This centers the canvas horizontally */
@@ -103,70 +182,4 @@ button {
     font-family: "Patrick Hand", cursive;
     font-weight: 400;
     font-style: normal;
-}
-
-#simulation {
-    display: none;
-}
-
-#title {
-    font-size: 50px;
-    margin-bottom: 25px;
-    position: relative;
-    z-index: 1;
-}
-
-#subtitle {
-    font-size: 20px;
-    text-align: center;
-    position: relative;
-    z-index: 1;
-}
-
-#overlayCanvas {
-    pointer-events: none;
-}
-
-#appleCanvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0; /* Lower z-index puts it behind other header content */
-    pointer-events: none;
-}
-
-#dropItemSelect {
-    display: none;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-
-}
-
-#dropItemSelect img {
-    width: 50px;
-    height: 50px;
-}
-
-#simControls {
-    display: none;
-}
-
-#atmosphereControls {
-    display: none;
-}
-
-#backBtn {
-    display: none;
-}
-
-#mainBtns {
-    display: flexbox;
-}
-
-#sandboxBtn {
-    background: #ffff;
 }

@@ -71,7 +71,10 @@ let nextBtn,
     simControls,
     densityControls,
     atmosphereControls,
-    simulation;
+    simulation,
+    canvases,
+    sandboxBtn,
+    simulationButtons;
 
 /* ==============================================================================================
     INITIALIZE VALUES FROM DOM
@@ -102,7 +105,11 @@ document.addEventListener("DOMContentLoaded", () => {
 // Grabs information from HTML
 function declareVariables() {
     // Get UI elements
-    sanboxBtn = document.getElementById("sandboxBtn");
+    sandboxBtn = document.getElementById("sandboxBtn");
+    gameCanvas = document.getElementById("gameCanvas");
+    simCanvas = document.getElementById("simulationCanvas");
+    overlayCanvas = document.getElementById("overlayCanvas");
+
     nextBtn = document.getElementById("nextBtn");
     backBtn = document.getElementById("backBtn");
     introText = document.getElementById("intro");
@@ -115,6 +122,8 @@ function declareVariables() {
     atmosphereControls = document.getElementById("atmosphereControls");
     densityControls = document.getElementById("densityControls");
     simulation = document.getElementById("simulation");
+    canvases = document.getElementById("canvases");
+    simulationButtons = document.getElementById("simulationButtons");
 
     // Set Lesson text and images
     headingText.innerHTML = headings[pageCount];
@@ -149,14 +158,20 @@ function goToLessonSection() {
     // Hide all optional controls by default
     simControls.style.display = "none";
     atmosphereControls.style.display = "none";
+    gameCanvas.style.display = "none";
+    simCanvas.style.display = "none";
+    overlayCanvas.style.display = "none";
+    dropItemSelect.style.display = "none";
+    simulationButtons.style.display = "none";
     //if (densityControls) densityControls.style.display = "none";
 
     // Unlock controls based on current lesson section
-    dropItemSelect.style.display = simulation.style.display = pageCount >= dropSection ? "block" : "none"; // A Quick Game and onward
+    simulation.style.display = pageCount >= dropSection ? "block" : "none"; // A Quick Game and onward
     backBtn.style.display = pageCount > 0 ? "inline-block" : "none";
     nextBtn.style.display = pageCount < headings.length - 1 ? "inline-block" : "none";
     nextBtn.innerHTML = pageCount > 0 ? "Next &rarr;" : "Start Learning!";
-    sanboxBtn.style.display = pageCount == 0 ? "inline-block" : "none";
+    sandboxBtn.style.display = pageCount == 0 ? "inline-block" : "none";
+    gameCanvas.style.display = dropItemSelect.style.display = pageCount == dropSection ? "block" : "none";
     //if (pageCount >= 7) atmosphereControls.style.display = "block"; // Enable air toggle
     //if (pageCount >= 8 && densityControls) densityControls.style.display = "block"; // Show buoyancy options
 }
@@ -171,19 +186,19 @@ function unlockSim() {
         isaacNewton.src = "img/svg/newton_desk.svg";
         simControls.style.display = "block";
         atmosphereControls.style.display = "block";
-        sanboxBtn.textContent = "Go Back";
+        sandboxBtn.textContent = "Go Back";
         nextBtn.style.display = "none";
-        simulation.style.display = "block";
+        simulationButtons.style.display =simulation.style.display = "block";
     } else {
         headingText.innerHTML = headings[pageCount];
         introText.innerHTML = scripts[pageCount];
         instructionText.innerHTML = instructions[pageCount];
         isaacNewton.src = images[pageCount];
-        sanboxBtn.textContent = "Sandbox";
+        sandboxBtn.textContent = "Sandbox";
         simControls.style.display = "none";
         atmosphereControls.style.display = "none";
         nextBtn.style.display = "";
-        simulation.style.display = "none";
+        simulationButtons.style.display = simulation.style.display = "none";
     }
 }
 
