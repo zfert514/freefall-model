@@ -15,6 +15,7 @@
         <script src="ui.js" defer></script>
         <script src="simulation.js" defer></script>
         <script src="game.js" defer></script>
+        <script src="motionCompare.js" defer></script>
     </head>
 
     <body id="noSelect">
@@ -42,6 +43,7 @@
 
                     <p id="instruction">Hit Next to learn more!</p>
                 </section>
+                <br />
 
                 <!-- DROPDOWN ITEM SELECTION -->
                 <div id="dropItemSelect">
@@ -86,7 +88,7 @@
                             <label><input type="checkbox" id="soundToggle" /> Play Sound on Impact</label>
                         </fieldset>
                     </form>
-                    
+
                     <br />
                     <div id="simulationButtons">
                         <button onclick="startSimulation()">Play</button>
@@ -95,6 +97,7 @@
                     </div>
 
                     <div id="canvases">
+                        <canvas id="compareCanvas" class="canvasBase"></canvas>
                         <canvas id="simulationCanvas" class="canvasBase"></canvas>
                         <canvas id="overlayCanvas" class="canvasBase"></canvas>
                         <canvas id="gameCanvas" class="canvasBase"></canvas>

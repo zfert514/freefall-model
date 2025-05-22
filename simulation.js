@@ -64,7 +64,7 @@ window.onload = () => {
     updateHeight();
     setupListeners();
     drawOverlay(0, 0, 0, 0, parseFloat(heightInput.value));
-    drawRuler();
+    //drawRuler();
 };
 
 // Grabs information from HTML
@@ -233,11 +233,9 @@ function changeUnit() {
     if (isMetric) {
         heightInput.value = height.toFixed(2);
         heightUnit.innerHTML = "m";
-        gravityUnit.innerHTML = "m/s<sup>2</sup>";
     } else {
         heightInput.value = convert(height).toFixed(2);
         heightUnit.innerHTML = "ft";
-        gravityUnit.innerHTML = "ft/s<sup>2</sup>";
     }
 }
 
