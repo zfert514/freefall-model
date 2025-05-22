@@ -3,132 +3,163 @@ This is the Apple falling animation document for the Freefall Simulation.
 It includes:
 - Functionality for randomly creating an apple
 - Functionality for animating the apple fall with one bounce
+- Functionality for drawing a fading mouse trail of apples
 */
 
 /* ==============================================================================================
    GLOBAL VARIABLES & SETTINGS
    ============================================================================================== */
 // Declare DOM elements globally
-let appleCanvas, appleImg, apple, lastTime;
+let appleCanvas, appleCtx, appleImg, apple, lastTime;
+
+// Mouse trail storage
+let mouseTrail = []; // each entry: { x, y, life }
 
 /* ==============================================================================================
-   FALLING APPLE ANIMATION
+   FALLING APPLE + MOUSE TRAIL ANIMATION
    ============================================================================================== */
-// Wait for the DOM to load before accessing elements
 window.addEventListener("DOMContentLoaded", () => {
-    // Get reference to the canvas where apples will be drawn
+    // Get reference to the canvas where apples (and mouse trail) will be drawn
     appleCanvas = document.getElementById("appleCanvas");
     appleCtx = appleCanvas.getContext("2d");
 
-    // Load the apple image
+    // Load the apple image (used for both the falling apple and mouse trail)
     appleImg = new Image();
     appleImg.src = "img/svg/apple_thin.svg";
 
-    // Declare apple object and time tracking
+    // Apple state
     apple = null;
     lastTime = 0;
 
-    // Set initial canvas size to match container
+    // Match canvas to its CSS size
     resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
 
-    // Once the apple image is loaded, start the animation
+    // When the apple image is ready, start spawning & animating
     appleImg.onload = () => {
-        spawnApple(); // Create the first apple
-        requestAnimationFrame(animateBannerApple); // Start the animation loop
+        spawnApple();
+        requestAnimationFrame(animateBanner);
     };
+
+    // Track mouse movements over the canvas
+    document.addEventListener("mousemove", trackMouse);
 });
 
 /* ==============================================================================================
-    UTILITY FUNCTIONS
+   CANVAS RESIZE
    ============================================================================================== */
-// Resize the canvas to match its displayed size
 function resizeCanvas() {
     appleCanvas.width = appleCanvas.offsetWidth;
     appleCanvas.height = appleCanvas.offsetHeight;
 }
 
-// Create a new apple falling from a random x-position at the top
+/* ==============================================================================================
+   APPLE SPAWNING & PHYSICS
+   ============================================================================================== */
 function spawnApple() {
     const x = Math.random() * appleCanvas.width;
-    apple = {
-        x, // horizontal position
-        y: -50, // start above the top of the canvas
-        vx: 0, // horizontal velocity
-        vy: 0, // vertical velocity
-        rotation: 0, // rotation angle
-        bounced: false, // track whether it has bounced
-        trail: [] // array for storing trail positions
-    };
+    apple = { x, y: -50, vx: 0, vy: 0, rotation: 0, bounced: false, trail: [] };
 }
 
-// Animation loop using requestAnimationFrame
-function animateBannerApple(timestamp) {
-    const dt = timestamp - lastTime; // Time since last frame
+/* ==============================================================================================
+   MAIN LOOP
+   ============================================================================================== */
+function animateBanner(timestamp) {
+    const dt = timestamp - lastTime;
     lastTime = timestamp;
 
-    appleCtx.clearRect(0, 0, appleCanvas.width, appleCanvas.height); // Clear previous frame
+    // Clear entire canvas (apple + mouse trail)
+    appleCtx.clearRect(0, 0, appleCanvas.width, appleCanvas.height);
 
-    updateApple(dt); // Move and simulate physics
-    drawApple(); // Render the apple and its trail
+    updateApple(dt);
+    updateMouseTrail(dt);
 
-    requestAnimationFrame(animateBannerApple); // Loop again
+    // Draw the mouse trail of apples behind the falling apple
+    drawMouseTrail();
+
+    // Draw your bouncing apple
+    drawApple();
+
+    requestAnimationFrame(animateBanner);
 }
 
-// Update the apple's position, velocity, and trail
+/* ==============================================================================================
+   APPLE LOGIC
+   ============================================================================================== */
 function updateApple(dt) {
     if (!apple) return;
 
-    // Apply gravity to vertical velocity
+    // gravity
     apple.vy += 0.002 * dt;
-
-    // Move apple based on velocity
     apple.y += apple.vy * dt;
-
-    // Increase rotation
     apple.rotation += 0.002 * dt;
 
-    // Save current position for trail
+    // build a simple trail for the apple itself (optional)
     apple.trail.push({ x: apple.x, y: apple.y, opacity: 1, rotation: apple.rotation });
-
-    // Limit trail to 10 entries
     if (apple.trail.length > 10) apple.trail.shift();
+    apple.trail.forEach((dot, i) => (dot.opacity = 0.7 - i / apple.trail.length));
 
-    // Fade out trail from newest to oldest
-    apple.trail.forEach((dot, i) => {
-        dot.opacity = 0.7 - i / apple.trail.length;
-    });
-
-    // Set bounce threshold near bottom of canvas
+    // bounce
     const ground = appleCanvas.height - 40;
-
-    // If apple reaches ground and hasn't bounced yet, bounce it
     if (apple.y >= ground && !apple.bounced) {
-        apple.vy = -0.4 * Math.sqrt(apple.vy); // Reverse and dampen vertical velocity
-        apple.vx = (Math.random() - 0.5) * 2;  // Add small random left/right push
+        apple.vy = -0.4 * Math.sqrt(apple.vy);
+        apple.vx = (Math.random() - 0.5) * 2;
         apple.bounced = true;
     }
-    // If apple has gone off screen, remove it and spawn another after a delay
+    // respawn off‐screen
     else if (apple.y > appleCanvas.height + 50) {
         apple = null;
         setTimeout(spawnApple, 1000);
     }
 }
 
-// Draw the apple and its trail on the canvas
 function drawApple() {
     if (!apple) return;
 
-    // Draw fading trail circles
+    // draw apple’s own fading trail (optional)
     for (let t of apple.trail) {
         appleCtx.globalAlpha = t.opacity * 0.5;
         appleCtx.drawImage(appleImg, t.x - 20, t.y - 20, 40, 40);
     }
 
-    // Draw the main apple, rotated
-    appleCtx.save(); // Save current canvas state
-    appleCtx.translate(apple.x, apple.y); // Move origin to apple position
-    appleCtx.rotate(apple.rotation); // Rotate around that origin
-    appleCtx.globalAlpha = 1; // Set full opacity
-    appleCtx.drawImage(appleImg, -20, -20, 40, 40); // Draw the apple centered
-    appleCtx.restore(); // Restore original canvas state
+    // draw the main apple
+    appleCtx.save();
+    appleCtx.translate(apple.x, apple.y);
+    appleCtx.rotate(apple.rotation);
+    appleCtx.globalAlpha = 1;
+    appleCtx.drawImage(appleImg, -20, -20, 40, 40);
+    appleCtx.restore();
+}
+
+/* ==============================================================================================
+   MOUSE TRAIL LOGIC (now draws apples)
+   ============================================================================================== */
+function trackMouse(e) {
+    const rect = appleCanvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    // Add a fresh dot with full “life” (1.0)
+    mouseTrail.push({ x, y, life: 1.0 });
+
+    // Keep trail length reasonable
+    if (mouseTrail.length > 50) mouseTrail.shift();
+}
+
+function updateMouseTrail(dt) {
+    // Fade each dot’s life down over time
+    for (let dot of mouseTrail) {
+        dot.life -= dt * 0.002; // tweak fade speed here
+    }
+    // Remove fully-faded dots
+    mouseTrail = mouseTrail.filter((dot) => dot.life > 0);
+}
+
+function drawMouseTrail() {
+    const size = 24; // apple icon size for the trail
+    for (let dot of mouseTrail) {
+        appleCtx.globalAlpha = dot.life * 0.6; // semi-transparent based on life
+        appleCtx.drawImage(appleImg, dot.x - size / 2, dot.y - size / 2, size, size);
+    }
+    appleCtx.globalAlpha = 1; // reset
 }

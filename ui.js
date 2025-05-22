@@ -136,7 +136,7 @@ const instructions = [
     "",
 
     // 8) Adjust Height & Gravity
-    "Use the height slider and gravity control, then press <b>Start</b> to see both effects.",
+    "Use the height slider and gravity control, then press <b>Start</b> to see both effects.<br> Your can even see the effects of gravity on other planets!",
 
     // 9) Ready for Water?
     "",
@@ -177,25 +177,25 @@ const images = [
     "img/svg/newton_point.svg",
 
     // 3) A Quick Game
-    "img/svg/newton_crossed.svg",
+    "img/svg/newton_question.svg",
 
     // 4) Landing Together
-    "img/svg/newton_landing.svg",
+    "img/svg/newton_hmm.svg",
 
     // 5) Try It Yourself
-    "img/svg/simulation_intro.svg",
+    "img/svg/newton_crossed.svg",
 
     // 6) Is Gravity Pulling Constantly?
-    "img/svg/newton_shrug.svg",
+    "img/svg/newton_chalkboard.svg",
 
     // 7) Gravity & Acceleration
-    "img/svg/constant_vs_accel.svg",
+    "img/svg/newton_desk.svg",
 
     // 8) Adjust Height & Gravity
-    "img/svg/adjust_settings.svg",
+    "img/svg/newton_telescope.svg",
 
     // 9) Ready for Water?
-    "img/svg/ready_for_water.svg",
+    "img/svg/newton_point.svg",
 
     // 10) Water Displacement
     "img/svg/water_displacement.svg",
@@ -221,6 +221,13 @@ const images = [
     // 17) You Discovered the Science of Falling
     "img/svg/newton_thumbs_up.svg"
 ];
+
+const preloadedImages = {};
+images.forEach((path) => {
+    const img = new Image();
+    img.src = path;
+    preloadedImages[path] = img;
+});
 
 let isSandbox = false; // Flag for sandbox
 let pageCount = 0; // Keep track of lesson pages

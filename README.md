@@ -32,3 +32,8 @@ Build an interactive simulation that demonstrates what happens to objects in fre
   - Hosted online (e.g., GitHub, CodePen)
 
 Please submit your response before your interview.
+
+## How to Run
+
+Simply open the `Freefall.html` file in any modern web browser (e.g., Chrome, Firefox, Edge).
+All assets are loaded locally and no server setup is required.
