@@ -159,56 +159,54 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    goToLessonSection();
+    updateLessonView();
 });
 
 // Grabs information from HTML
 function declareVariables() {
     // Get UI elements
-    sandboxBtn = document.getElementById("sandboxBtn");
-    gameCanvas = document.getElementById("gameCanvas");
-    simCanvas = document.getElementById("simulationCanvas");
-    overlayCanvas = document.getElementById("overlayCanvas");
-
     nextBtn = document.getElementById("nextBtn");
     backBtn = document.getElementById("backBtn");
-    introText = document.getElementById("intro");
+    sandboxBtn = document.getElementById("sandboxBtn");
+
     headingText = document.getElementById("heading");
+    introText = document.getElementById("intro");
     instructionText = document.getElementById("instruction");
-    dropItemSelect = document.getElementById("dropItemSelect");
     isaacNewton = document.getElementById("isaacNewton");
+    dropItemSelect = document.getElementById("dropItemSelect");
+
     simControls = document.getElementById("simControls");
-    gravityLabel = document.getElementById("gravityLabel");
     atmosphereControls = document.getElementById("atmosphereControls");
     densityControls = document.getElementById("densityControls");
+
     simulation = document.getElementById("simulation");
     canvases = document.getElementById("canvases");
     simulationButtons = document.getElementById("simulationButtons");
 
-    // Set Lesson text and images
-    headingText.innerHTML = headings[pageCount];
-    introText.innerHTML = scripts[pageCount];
-    instructionText.innerHTML = instructions[pageCount];
-    isaacNewton.src = images[pageCount];
+    simCanvas = document.getElementById("simulationCanvas");
+    overlayCanvas = document.getElementById("overlayCanvas");
+    gameCanvas = document.getElementById("gameCanvas");
+
+    updateLessonView();
 }
 
 // Moves to the next lesson section
 function nextSlide() {
-    pageCount += 1;
-    goToLessonSection();
+    pageCount++;
+    updateLessonView();
 }
 
 // Moves to the previous lesson section
 function backSlide() {
-    pageCount -= 1;
-    goToLessonSection();
+    pageCount--;
+    updateLessonView();
 }
 
 /* ==============================================================================================
     UTILITY FUNCTIONS
    ============================================================================================== */
 // Controls UI visibility and feature access depending on which lesson section is active
-function goToLessonSection() {
+function updateLessonView() {
     // Change text and images for that slide
     headingText.innerHTML = headings[pageCount];
     introText.innerHTML = scripts[pageCount];
@@ -253,18 +251,8 @@ function unlockSim() {
         simCanvas.style.display = "block";
         overlayCanvas.style.display = "block";
     } else {
-        headingText.innerHTML = headings[pageCount];
-        introText.innerHTML = scripts[pageCount];
-        instructionText.innerHTML = instructions[pageCount];
-        isaacNewton.src = images[pageCount];
+        updateLessonView();
         sandboxBtn.textContent = "Sandbox";
-        simControls.style.display = "none";
-        atmosphereControls.style.display = "none";
-        nextBtn.style.display = "";
-        simulation.style.display = "none";
-        simulationButtons.style.display = "none";
-        simCanvas.style.display = "block";
-        overlayCanvas.style.display = "block";
     }
 }
 

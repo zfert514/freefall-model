@@ -87,7 +87,7 @@ header {
 }
 
 #mainBtns {
-    display: flexbox;
+    display: block;
 }
 
 #noSelect {
@@ -170,9 +170,9 @@ header {
    ============================================================================================== */
 /* Sets the base style for a canvas with border */
 .canvasBase {
-    border: 1px solid #000000;
+    border: 1px solid #000;
     display: block;
-    margin: 0 auto; /* This centers the canvas horizontally */
+    margin: 10px auto; /* This centers the canvas horizontally */
     position: absolute;
     left: -150px;
     top: 20px;
