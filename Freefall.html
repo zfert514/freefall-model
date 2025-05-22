@@ -19,7 +19,7 @@ It includes:
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap" rel="stylesheet" />
         <!-- Import CSS -->
-        <link rel="stylesheet" href="FrefallStyles.css" />
+        <link rel="stylesheet" href="styles.css" />
         <!-- Import JS -->
         <script src="appleBanner.js" defer></script>
         <script src="ui.js" defer></script>
@@ -42,7 +42,7 @@ It includes:
                 <div id="lessonNav">
                     <h2 id="heading"></h2>
                     <div id="lessonText">
-                        <img id="isaacNewton" src="img/svg/newton_chalkboard.svg" />
+                        <img id="isaacNewton" src="img/SVG/newton_chalkboard.svg" />
                         <h3 id="intro"></h3>
                         <br />
                     </div>
@@ -109,11 +109,11 @@ It includes:
                     </div>
                     <!-- Dual canvas system: main canvas + overlay canvas -->
                     <div id="canvases">
-                        <canvas id="gameCanvas" class="canvasBase"></canvas>
                         <!-- Main canvas for rendering falling ball animation -->
                         <canvas id="simulationCanvas" class="canvasBase"></canvas>
                         <!-- Overlay canvas for drawing simulation metrics (velocity, time, etc.) -->
                         <canvas id="overlayCanvas" class="canvasBase"></canvas>
+                        <canvas id="gameCanvas" class="canvasBase"></canvas>
                     </div>
                 </div>
             </div>

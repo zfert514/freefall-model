@@ -26,14 +26,16 @@ const meterToPx = gameCanvasSize / maxMeters; // px per meter
 let gameCanvas, gameCtx;
 let dropButtons;
 
+//  ─── Load gameApple source ─────────────────────────────────────────────────────
+const gameApple = new Image();
+gameApple.src = "img/svg/apple_thin.svg";
+
 // ─── State ───────────────────────────────────────────────────────────────────────
 let activeButton = null; // tracks which choice is currently “down” (disabled)
 
 // ─── Initialization ──────────────────────────────────────────────────────────────
 
-window.onload = () => {
-    initGame();
-};
+document.addEventListener("DOMContentLoaded", initGame);
 
 function initGame() {
     // 1) Canvas setup
@@ -41,13 +43,10 @@ function initGame() {
     gameCtx = gameCanvas.getContext("2d");
     gameCanvas.width = gameCanvas.height = gameCanvasSize;
 
-    // 2) Load AppleThin source
-    appleImg.src = window.appleImage?.src || "img/svg/apple_thin.svg";
+    // 2) Once both base images are ready, draw them
+    Promise.all([new Promise((r) => (gameApple.onload = r))]).then(drawStatic);
 
-    // 3) Once both base images are ready, draw them
-    Promise.all([new Promise((r) => (appleImg.onload = r))]).then(drawStatic);
-
-    // 4) Wire up the drop-item buttons
+    // 3) Wire up the drop-item buttons
     dropButtons = Array.from(document.querySelectorAll("#dropItemSelect button"));
     dropButtons.forEach((btn) => {
         btn.addEventListener("click", onDropButtonClick);
@@ -65,7 +64,7 @@ function drawStatic() {
     const y0 = 10; // 10px from top
     const appleX = gameCanvasSize * 0.45 - aSize / 2;
 
-    gameCtx.drawImage(appleImg, appleX, y0, aSize, aSize);
+    gameCtx.drawImage(gameApple, appleX, y0, aSize, aSize);
 }
 
 // ─── Click Handler: pick your item, disable its button, re-enable the old one ────
@@ -81,7 +80,7 @@ function onDropButtonClick(evt) {
 
     // 3) once it’s ready, redraw static + show the pick + animate both drops
     pickImg.onload = () => {
-        drawStatic();
+        //drawStatic();
         drawPickAtTop(pickImg);
         animateDrop(pickImg);
     };
@@ -125,11 +124,11 @@ function animateDrop(pickImg) {
         const dy = Math.min(s * meterToPx, groundY - 10);
         const y = 10 + dy;
 
-        // 1) redraw the fixed scene
-        drawStatic();
+        // 1) Clear the canvas
+        gameCtx.clearRect(0, 0, gameCanvasSize, gameCanvasSize);
 
         // 2) draw both falling objects
-        gameCtx.drawImage(appleImg, xApple, y, applePx, applePx);
+        gameCtx.drawImage(gameApple, xApple, y, applePx, applePx);
         gameCtx.drawImage(pickImg, xPick, y, applePx, applePx);
 
         // 3) keep going until they hit “groundY”

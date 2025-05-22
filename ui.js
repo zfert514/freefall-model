@@ -18,20 +18,79 @@ let headings = [
     "A Quick Game",
     "Try It Yourself",
     "Is Gravity Pulling Constantly?",
-    "Air Makes Things Interesting",
+    "Gravity & Acceleration",
+    "Water Displacement",
+    "Interactive Water Displacement",
     "What About Buoyancy?",
+    "When Buoyancy Wins",
+    "Air as a Fluid",
+    "Vacuum vs Air",
+    "Terminal Velocity",
     "You Discovered the Science of Falling"
 ];
 const scripts = [
     "",
-    "Hi there! I'm Sir Isaac Newton <i>(but my friends just call me Newton)</i> and this is my friend Mr. Apple. We're here to help you understand something amazing: how things fall!",
-    "When we drop something, we know it falls to the ground. But have you ever stopped to wonder *why*? Maybe you've heard the word \"gravity.\" Let's learn a little more about how that works.",
-    "Let's try something. I'm going to drop my friend Mr. Apple and you choose one of the items below to drop. Try to choose something that will fall faster than Mr. Apple.",
-    "Use the simulation below. You can: • Drag Apple to change the starting height • Press 'Start' to see how it falls. What do you notice?",
-    "Now watch two objects fall: • One falls at a constant speed • One falls like a real object. Which one looks more like real life? The real one speeds up as it falls. That’s acceleration!",
-    'Try switching the atmosphere from "Vacuum" to "Air." You’ll see lighter things fall more slowly. That’s air resistance—air pushing back on things that fall.',
-    "Buoyancy is what makes things float—like a balloon in air or a duck in a tub. Try placing a low-density object in the simulation—it might float! Now try a heavier one. See how density and buoyancy affect motion.",
-    "Gravity pulls. Air resists. Buoyancy pushes. You’ve learned why rocks fall, feathers float, and balloons rise. Great job!"
+
+    // 1) Intro to Newton & Apple
+    `Hi there! I'm Sir Isaac Newton <i>(but my friends just call me Newton)</i> and this is my friend Mr. Apple. 
+  We're here to help you understand something amazing: how things fall!`,
+
+    // 2) What is gravity?
+    `When we drop something, we know it falls to the ground. But have you ever stopped to wonder *why*? 
+  Maybe you've heard the word "gravity." Let's learn a little more about how that works.`,
+
+    // 3) Quick game prompt
+    `Let's try something. I'm going to drop my friend Mr. Apple and you choose one of the items below to drop. 
+  Try to choose something that will fall faster than Mr. Apple.`,
+
+    // 4) Sandbox simulation intro
+    `Use the simulation below. You can:
+   • Drag Apple to change the starting height  
+   • Press 'Start' to see how it falls.  
+  What do you notice?`,
+
+    // 5) Constant vs accelerating fall
+    `Now watch two objects fall:
+   • One falls at a constant speed  
+   • One falls like a real object.  
+  Which one looks more like real life? The real one speeds up as it falls. That’s acceleration!`,
+
+    // 6) Relationship of acceleration & gravity
+    `Acceleration on Earth happens because gravity pulls all objects toward its center at about 9.8 m/s². 
+  No matter their mass, everything speeds up downward at the same rate under gravity.`,
+
+    // 7) Water displacement concept
+    `When you drop something into water, it pushes water molecules out of its way—this is called displacement. 
+  The displaced water pushes back on the object, slowing its fall more than air resistance alone.`,
+
+    // 8) Interactive water-displacement activity
+    `Try this interactive: drop different objects into the water chamber below. 
+  Watch how quickly each sinks and how water displacement changes their speed.`,
+
+    // 9) Buoyancy intro
+    `Buoyancy is what makes things float—like a balloon in air or a duck in a tub. 
+  Try placing a low-density object in the simulation—it might float! Now try a heavier one. 
+  See how density and buoyancy affect motion.`,
+
+    // 10) When buoyancy overcomes gravity
+    `If an object is less dense than the fluid it’s in, the buoyant force can exceed gravity, 
+  causing it to rise instead of sink.`,
+
+    // 11) Air as a fluid
+    `In the real world, air behaves like a light fluid. As an apple falls, it must push air molecules aside, 
+  which slows its descent—just like water, but much less dense.`,
+
+    // 12) Vacuum vs Air
+    `Try switching the atmosphere from "Vacuum" to "Air."  
+  You’ll see lighter things fall more slowly. That’s air resistance—air pushing back on things that fall.`,
+
+    // 13) Terminal velocity
+    `If an object falls long enough, air resistance and gravity balance out so it stops accelerating. 
+  That stable speed is called terminal velocity—the maximum speed it will reach as it falls.`,
+
+    // 14) Wrap-up
+    `Gravity pulls. Air resists. Buoyancy pushes.  
+  You’ve learned why rocks fall, feathers float, and balloons rise. Great job!`
 ];
 
 const instructions = [
@@ -99,6 +158,7 @@ document.addEventListener("DOMContentLoaded", () => {
             backSlide();
         });
     }
+
     goToLessonSection();
 });
 
@@ -188,7 +248,10 @@ function unlockSim() {
         atmosphereControls.style.display = "block";
         sandboxBtn.textContent = "Go Back";
         nextBtn.style.display = "none";
-        simulationButtons.style.display =simulation.style.display = "block";
+        simulation.style.display = "block";
+        simulationButtons.style.display = "block";
+        simCanvas.style.display = "block";
+        overlayCanvas.style.display = "block";
     } else {
         headingText.innerHTML = headings[pageCount];
         introText.innerHTML = scripts[pageCount];
@@ -198,7 +261,10 @@ function unlockSim() {
         simControls.style.display = "none";
         atmosphereControls.style.display = "none";
         nextBtn.style.display = "";
-        simulationButtons.style.display = simulation.style.display = "none";
+        simulation.style.display = "none";
+        simulationButtons.style.display = "none";
+        simCanvas.style.display = "block";
+        overlayCanvas.style.display = "block";
     }
 }
 
