@@ -12,11 +12,12 @@ body {
     font-family: "Patrick Hand", Helvetica, Arial;
     background: #91daff;
     color: #333;
+    line-height: 1.5;
 }
 
 button {
     font-family: "Patrick Hand", Helvetica, Arial;
-    font-size: medium;
+    font-size: 1.2rem;
     padding-left: 15px;
     padding-right: 15px;
     padding-top: 5px;
@@ -27,7 +28,7 @@ button {
 
 /* Remove blue flash when click happens */
 header {
-    line-height: 0.6;
+    line-height: 1;
     background: #777bfd;
     display: inline-flexbox;
     padding: 50px;
@@ -62,7 +63,12 @@ header {
 }
 
 #heading {
-    font-size: xx-large;
+    font-size: 2rem;
+    text-decoration: underline;
+}
+
+#instruction {
+    font-size: 1.2rem;
 }
 
 #lessonText {
@@ -72,11 +78,12 @@ header {
     justify-content: center;
     gap: 20px;
     text-align: left;
+    font-size: 1.2rem;
 }
 
 #lessonText img {
     flex-shrink: 0;
-    width: 150px;
+    width: 28%;
     float: left;
 }
 
@@ -121,14 +128,14 @@ header {
 }
 
 #subtitle {
-    font-size: 20px;
+    font-size: 2rem;
     text-align: center;
     position: relative;
     z-index: 1;
 }
 
 #title {
-    font-size: 50px;
+    font-size: 4rem;
     margin-bottom: 25px;
     position: relative;
     z-index: 1;

@@ -74,11 +74,11 @@ const scripts = [
 
     // 9) Ready for Water?
     `There’s still one element to falling that we haven’t explored yet. 
-  Before we get into that, let me tell you a little about water.`,
+  Before we get into that, Mr. Apple will tell you a little about water.`,
 
     // 10) Water Displacement
     `When you drop something into water, it pushes water molecules out of its way—this is called displacement. 
-  The displaced water pushes back on the object, slowing its fall more than air resistance alone.`,
+  The displaced water pushes back on the object, slowing its fall.`,
 
     // 11) Interactive Water Displacement
     `Try this interactive: drop different objects into the water chamber below. 
@@ -198,7 +198,7 @@ const images = [
     "img/svg/newton_point.svg",
 
     // 10) Water Displacement
-    "img/svg/water_displacement.svg",
+    "img/svg/mr_apple_point.svg",
 
     // 11) Interactive Water Displacement
     "img/svg/water_interactive.svg",
